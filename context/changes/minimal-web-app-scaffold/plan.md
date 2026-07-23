@@ -157,19 +157,19 @@ None — no existing data, users, or deployed instance. This replaces an unused 
 
 #### Automated
 
-- [x] 1.1 `uv run python -c "import app.main"` succeeds
-- [x] 1.2 `dist/index.html` exists on disk
+- [x] 1.1 `uv run python -c "import app.main"` succeeds — 06de947
+- [x] 1.2 `dist/index.html` exists on disk — 06de947
 
 #### Manual
 
-- [x] 1.3 Browser shows branded "10xDevTracker" placeholder at `http://127.0.0.1:8000/`
-- [x] 1.4 `http://127.0.0.1:8000/docs` still loads alongside the frontend mount
+- [x] 1.3 Browser shows branded "10xDevTracker" placeholder at `http://127.0.0.1:8000/` — 06de947
+- [x] 1.4 `http://127.0.0.1:8000/docs` still loads alongside the frontend mount — 06de947
 
 ### Phase 2: Run & manual verification
 
 #### Automated
 
-- [ ] 2.1 Background server boot + `curl` root returns HTTP 200 with placeholder text
+- [x] 2.1 Background server boot + `curl` root returns HTTP 200 with placeholder text
 
 #### Manual
 
