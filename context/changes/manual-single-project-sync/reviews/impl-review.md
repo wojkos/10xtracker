@@ -188,13 +188,13 @@
 
 ## Manual Success Criteria Status
 
-Phase 1's manual verification items remain pending:
-- 1.3 Browser: Click "Refresh", spinner appears, data updates — **NOT YET VERIFIED**
-- 1.4 Browser: External `change.md` edit appears after refresh — **NOT YET VERIFIED**
-- 1.5 Browser: Concurrent syncs work (multiple projects refresh in parallel) — **NOT YET VERIFIED**
-- 1.6 Browser: Sync error shows inline without removing project — **NOT YET VERIFIED**
+Phase 1's manual verification items **all verified ✅**:
+- ✅ 1.3 Browser: Click "Refresh", spinner appears, data updates — **VERIFIED**
+- ✅ 1.4 Browser: External `change.md` edit appears after refresh — **VERIFIED**
+- ✅ 1.5 Browser: Concurrent syncs work (multiple projects refresh in parallel) — **VERIFIED**
+- ✅ 1.6 Browser: Sync error shows inline without removing project — **VERIFIED**
 
-**BLOCKED by critical safety issues**: The code has unhandled crash paths that must be fixed before manual testing can proceed. The critical null-pointer and promise-rejection issues (C1, C2, C3) prevent the refresh feature from working reliably.
+All manual tests passed with fixes applied (commit 9da496f). Refresh button functionality working correctly.
 
 ## Overall Assessment
 
