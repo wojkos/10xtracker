@@ -203,8 +203,8 @@ Purely additive. `data/settings.json` doesn't exist until the first save; `load_
 
 #### Automated
 
-- [ ] 2.1 `uv run python -c "import app.main"` succeeds
-- [ ] 2.2 `curl http://127.0.0.1:8000/` returns HTTP 200
+- [x] 2.1 `uv run python -c "import app.main"` succeeds — 31ed33b
+- [x] 2.2 `curl http://127.0.0.1:8000/` returns HTTP 200 — 31ed33b
 
 #### Manual
 
