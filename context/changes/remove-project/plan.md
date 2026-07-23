@@ -170,8 +170,8 @@ None — no data format change; removal operates on the same `data/tracked_proje
 
 #### Automated
 
-- [ ] 2.1 `uv run pytest tests/test_api.py -v` passes
-- [ ] 2.2 `uv run python -c "import app.main"` succeeds
+- [x] 2.1 `uv run pytest tests/test_api.py -v` passes — 6666af1
+- [x] 2.2 `uv run python -c "import app.main"` succeeds — 6666af1
 
 #### Manual
 

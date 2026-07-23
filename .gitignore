@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .venv/
 data/
+.claude/skills/10x-*
+.claude/prompts/m*
+skills-lock.json
+.gitignore

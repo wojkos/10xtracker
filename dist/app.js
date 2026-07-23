@@ -93,6 +93,15 @@ function renderProjectSection(project) {
   loadingIndicator.style.display = loadingProjects.has(project.path) ? "inline-block" : "none";
   controls.appendChild(loadingIndicator);
 
+  const removeBtn = document.createElement("button");
+  removeBtn.className = "remove-btn";
+  removeBtn.textContent = "Remove";
+  removeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    removeProject(project.path);
+  });
+  controls.appendChild(removeBtn);
+
   header.appendChild(controls);
   article.appendChild(header);
 
@@ -218,6 +227,37 @@ async function syncProject(projectPath) {
   } finally {
     loadingProjects.delete(projectPath);
     updateProjectUI(projectPath);
+  }
+}
+
+async function removeProject(projectPath) {
+  if (!window.confirm(`Remove "${projectPath}" from tracked projects?`)) {
+    return;
+  }
+
+  const errorDiv = document.getElementById(`sync-error-${projectPath}`);
+
+  try {
+    const response = await fetch("/api/projects", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: projectPath }),
+    });
+    const body = await response.json();
+
+    if (!response.ok) {
+      if (errorDiv) {
+        errorDiv.textContent = body.detail || "Failed to remove project.";
+      }
+      return;
+    }
+
+    await loadProjects();
+    applyExpandedState();
+  } catch (error) {
+    if (errorDiv) {
+      errorDiv.textContent = `Error: ${error.message}`;
+    }
   }
 }
 

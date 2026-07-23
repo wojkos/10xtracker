@@ -3,7 +3,7 @@
 ## Running the app
 
 ```bash
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --port 8000 --reload
 ```
 
 Then open http://127.0.0.1:8000/ in a browser.
