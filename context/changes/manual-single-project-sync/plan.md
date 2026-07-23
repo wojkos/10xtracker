@@ -142,8 +142,8 @@ None — purely additive UI feature; no data changes or persisted state migratio
 
 #### Automated
 
-- [ ] 1.1 `uv run python -c "import app.main"` succeeds
-- [ ] 1.2 `curl http://127.0.0.1:8000/` returns HTTP 200
+- [x] 1.1 `uv run python -c "import app.main"` succeeds — 06c6411
+- [x] 1.2 `curl http://127.0.0.1:8000/` returns HTTP 200 — 06c6411
 
 #### Manual
 
