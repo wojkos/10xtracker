@@ -4,12 +4,16 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.changes import ChangeSummary, list_changes
-from app.projects import add_tracked_project, load_tracked_projects
+from app.projects import add_tracked_project, load_tracked_projects, remove_tracked_project
 
 router = APIRouter()
 
 
 class AddProjectRequest(BaseModel):
+    path: str
+
+
+class RemoveProjectRequest(BaseModel):
     path: str
 
 
@@ -38,3 +42,12 @@ def add_project(request: AddProjectRequest) -> ProjectResponse:
 @router.get("/projects", response_model=list[ProjectResponse])
 def list_projects() -> list[ProjectResponse]:
     return [_to_project_response(path) for path in load_tracked_projects()]
+
+
+@router.delete("/projects")
+def remove_project(request: RemoveProjectRequest) -> dict[str, bool]:
+    try:
+        remove_tracked_project(Path(request.path))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return {"removed": True}

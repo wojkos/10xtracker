@@ -164,7 +164,7 @@ None — no data format change; removal operates on the same `data/tracked_proje
 
 #### Automated
 
-- [ ] 1.1 `uv run pytest tests/test_projects.py -v` passes
+- [x] 1.1 `uv run pytest tests/test_projects.py -v` passes — b85acc8 (mixed with unrelated project-list-aggregate-status commit; content verified)
 
 ### Phase 2: API layer
 

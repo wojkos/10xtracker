@@ -81,3 +81,23 @@ def test_get_after_post_returns_project_in_list(client: TestClient, tmp_path: Pa
     body = response.json()
     assert len(body) == 1
     assert body[0]["name"] == "fixture-project"
+
+
+def test_delete_after_post_removes_project(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.request("DELETE", "/api/projects", json={"path": str(project)})
+
+    assert response.status_code == 200
+    list_response = client.get("/api/projects")
+    assert list_response.json() == []
+
+
+def test_delete_never_added_path_returns_404(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project(tmp_path)
+
+    response = client.request("DELETE", "/api/projects", json={"path": str(project)})
+
+    assert response.status_code == 404
+    assert "detail" in response.json()
