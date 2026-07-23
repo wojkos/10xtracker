@@ -210,9 +210,9 @@ None — the new UI replaces the existing full-list view. No data migration or d
 
 #### Automated
 
-- [x] 1.1 `dist/app.js`: `getStatusBucket()` function added
-- [x] 1.2 `dist/app.js`: `getAggregates()` function added
-- [x] 1.3 `dist/app.js`: `renderProjects()` calls aggregation per project
+- [x] 1.1 `dist/app.js`: `getStatusBucket()` function added — b85acc8
+- [x] 1.2 `dist/app.js`: `getAggregates()` function added — b85acc8
+- [x] 1.3 `dist/app.js`: `renderProjects()` calls aggregation per project — b85acc8
 
 #### Manual
 
@@ -222,8 +222,8 @@ None — the new UI replaces the existing full-list view. No data migration or d
 
 #### Automated
 
-- [ ] 2.1 `dist/index.html`: structure updated for summary + detail layout
-- [ ] 2.2 `dist/app.js`: `renderProjects()` renders summary lines with counts
+- [x] 2.1 `dist/index.html`: structure updated for summary + detail layout
+- [x] 2.2 `dist/app.js`: `renderProjects()` renders summary lines with counts
 
 #### Manual
 

@@ -21,17 +21,38 @@ function getAggregates(changes) {
 }
 
 function renderProjectSection(project) {
-  const section = document.createElement("section");
-  section.id = `project-${project.path}`;
+  const article = document.createElement("article");
+  article.setAttribute("data-project-path", project.path);
+  article.id = `project-${project.path}`;
 
-  const headingContainer = document.createElement("div");
-  headingContainer.style.display = "flex";
-  headingContainer.style.alignItems = "center";
-  headingContainer.style.justifyContent = "space-between";
+  const header = document.createElement("header");
 
   const heading = document.createElement("h2");
   heading.textContent = `${project.name} (${project.path})`;
-  headingContainer.appendChild(heading);
+  header.appendChild(heading);
+
+  const aggregates = project.aggregates || { new: 0, in_progress: 0, done: 0, blocked: 0 };
+  const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
+
+  const summaryStats = document.createElement("p");
+  summaryStats.className = "summary-stats";
+  summaryStats.textContent = countStr;
+
+  if (aggregates.blocked > 0) {
+    const blockedNote = document.createElement("span");
+    blockedNote.className = "blocked-note";
+    blockedNote.textContent = ` (${aggregates.blocked} Blocked)`;
+    summaryStats.appendChild(blockedNote);
+  }
+
+  const total = aggregates.new + aggregates.in_progress + aggregates.done + aggregates.blocked;
+  if (total === 0) {
+    const emptyNote = document.createElement("span");
+    emptyNote.textContent = " (no readable changes)";
+    summaryStats.appendChild(emptyNote);
+  }
+
+  header.appendChild(summaryStats);
 
   const controls = document.createElement("div");
   controls.className = "project-controls";
@@ -40,7 +61,10 @@ function renderProjectSection(project) {
   refreshBtn.className = "refresh-btn";
   refreshBtn.textContent = "Refresh";
   refreshBtn.disabled = loadingProjects.has(project.path);
-  refreshBtn.addEventListener("click", () => syncProject(project.path));
+  refreshBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    syncProject(project.path);
+  });
   controls.appendChild(refreshBtn);
 
   const loadingIndicator = document.createElement("span");
@@ -49,8 +73,12 @@ function renderProjectSection(project) {
   loadingIndicator.style.display = loadingProjects.has(project.path) ? "inline-block" : "none";
   controls.appendChild(loadingIndicator);
 
-  headingContainer.appendChild(controls);
-  section.appendChild(headingContainer);
+  header.appendChild(controls);
+  article.appendChild(header);
+
+  const details = document.createElement("div");
+  details.className = "details";
+  details.hidden = true;
 
   const list = document.createElement("ul");
   for (const change of project.changes) {
@@ -60,14 +88,16 @@ function renderProjectSection(project) {
       : `${change.title} [${change.status}] — updated ${change.updated}`;
     list.appendChild(item);
   }
-  section.appendChild(list);
+  details.appendChild(list);
 
   const errorDiv = document.createElement("div");
   errorDiv.className = "sync-error";
   errorDiv.id = `sync-error-${project.path}`;
-  section.appendChild(errorDiv);
+  details.appendChild(errorDiv);
 
-  return section;
+  article.appendChild(details);
+
+  return article;
 }
 
 function renderProjects(projects) {
@@ -96,11 +126,38 @@ async function syncProject(projectPath) {
       throw new Error("Project not found in response");
     }
 
-    const errorDiv = document.getElementById(`sync-error-${projectPath}`);
+    const article = document.getElementById(`project-${projectPath}`);
+    const errorDiv = article.querySelector(".sync-error");
     errorDiv.textContent = "";
 
-    const section = document.getElementById(`project-${projectPath}`);
-    const changesList = section.querySelector("ul");
+    project.aggregates = getAggregates(project.changes);
+
+    const header = article.querySelector("header");
+    const oldStats = header.querySelector(".summary-stats");
+    const aggregates = project.aggregates;
+    const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
+
+    const newStats = document.createElement("p");
+    newStats.className = "summary-stats";
+    newStats.textContent = countStr;
+
+    if (aggregates.blocked > 0) {
+      const blockedNote = document.createElement("span");
+      blockedNote.className = "blocked-note";
+      blockedNote.textContent = ` (${aggregates.blocked} Blocked)`;
+      newStats.appendChild(blockedNote);
+    }
+
+    const total = aggregates.new + aggregates.in_progress + aggregates.done + aggregates.blocked;
+    if (total === 0) {
+      const emptyNote = document.createElement("span");
+      emptyNote.textContent = " (no readable changes)";
+      newStats.appendChild(emptyNote);
+    }
+
+    oldStats.replaceWith(newStats);
+
+    const changesList = article.querySelector(".details ul");
     changesList.innerHTML = "";
     for (const change of project.changes) {
       const item = document.createElement("li");
