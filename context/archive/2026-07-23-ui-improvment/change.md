@@ -1,10 +1,10 @@
 ---
 change_id: ui-improvment
 title: Ui improvment
-status: implementing
+status: archived
 created: 2026-07-23
 updated: 2026-07-23
-archived_at: null
+archived_at: 2026-07-23T13:46:17Z
 ---
 
 ## Notes
