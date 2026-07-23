@@ -209,15 +209,15 @@ None — greenfield feature, no existing tracked-project data or deployed instan
 
 #### Automated
 
-- [x] 1.1 `uv run pytest tests/test_changes.py -v` passes
-- [x] 1.2 `uv run pytest tests/test_projects.py -v` passes
+- [x] 1.1 `uv run pytest tests/test_changes.py -v` passes — 09bcb5c
+- [x] 1.2 `uv run pytest tests/test_projects.py -v` passes — 09bcb5c
 
 ### Phase 2: API layer
 
 #### Automated
 
-- [ ] 2.1 `uv run pytest tests/test_api.py -v` passes
-- [ ] 2.2 `uv run python -c "import app.main"` succeeds
+- [x] 2.1 `uv run pytest tests/test_api.py -v` passes
+- [x] 2.2 `uv run python -c "import app.main"` succeeds
 
 #### Manual
 
