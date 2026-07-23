@@ -222,8 +222,8 @@ None — the new UI replaces the existing full-list view. No data migration or d
 
 #### Automated
 
-- [x] 2.1 `dist/index.html`: structure updated for summary + detail layout
-- [x] 2.2 `dist/app.js`: `renderProjects()` renders summary lines with counts
+- [x] 2.1 `dist/index.html`: structure updated for summary + detail layout — ba3c50a
+- [x] 2.2 `dist/app.js`: `renderProjects()` renders summary lines with counts — ba3c50a
 
 #### Manual
 
@@ -234,8 +234,8 @@ None — the new UI replaces the existing full-list view. No data migration or d
 
 #### Automated
 
-- [ ] 3.1 `dist/app.js`: `loadExpandedState()` and `saveExpandedState()` functions added
-- [ ] 3.2 `dist/app.js`: click handlers wire expand/collapse behavior
+- [x] 3.1 `dist/app.js`: `loadExpandedState()` and `saveExpandedState()` functions added
+- [x] 3.2 `dist/app.js`: click handlers wire expand/collapse behavior
 
 #### Manual
 

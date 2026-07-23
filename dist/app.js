@@ -94,20 +94,6 @@ function renderProjectSection(project) {
   controls.appendChild(loadingIndicator);
 
   header.appendChild(controls);
-
-  header.addEventListener("click", (e) => {
-    if (e.target.closest(".project-controls")) {
-      return;
-    }
-    details.hidden = !details.hidden;
-    if (details.hidden) {
-      delete expandedState[project.path];
-    } else {
-      expandedState[project.path] = true;
-    }
-    saveExpandedState(expandedState);
-  });
-
   article.appendChild(header);
 
   const details = document.createElement("div");
@@ -130,6 +116,19 @@ function renderProjectSection(project) {
   details.appendChild(errorDiv);
 
   article.appendChild(details);
+
+  header.addEventListener("click", (e) => {
+    if (e.target.closest(".project-controls")) {
+      return;
+    }
+    details.hidden = !details.hidden;
+    if (details.hidden) {
+      delete expandedState[project.path];
+    } else {
+      expandedState[project.path] = true;
+    }
+    saveExpandedState(expandedState);
+  });
 
   return article;
 }
@@ -227,8 +226,22 @@ async function loadProjects() {
   renderProjects(projects);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadProjects();
+function applyExpandedState() {
+  for (const article of document.querySelectorAll("article[data-project-path]")) {
+    const path = article.getAttribute("data-project-path");
+    const details = article.querySelector(".details");
+    if (expandedState[path]) {
+      details.hidden = false;
+    } else {
+      details.hidden = true;
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  loadExpandedState();
+  await loadProjects();
+  applyExpandedState();
 
   const form = document.getElementById("add-project-form");
   const input = document.getElementById("project-path");
@@ -252,5 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     input.value = "";
     await loadProjects();
+    applyExpandedState();
   });
 });
