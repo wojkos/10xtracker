@@ -169,7 +169,7 @@ None — no existing data, users, or deployed instance. This replaces an unused 
 
 #### Automated
 
-- [x] 2.1 Background server boot + `curl` root returns HTTP 200 with placeholder text
+- [x] 2.1 Background server boot + `curl` root returns HTTP 200 with placeholder text — cfe288f
 
 #### Manual
 
