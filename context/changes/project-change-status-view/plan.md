@@ -228,8 +228,8 @@ None — greenfield feature, no existing tracked-project data or deployed instan
 
 #### Automated
 
-- [x] 3.1 `uv run python -c "import app.main"` succeeds
-- [x] 3.2 Background server boot + `curl` on `/` returns HTTP 200
+- [x] 3.1 `uv run python -c "import app.main"` succeeds — 83eeb0c
+- [x] 3.2 Background server boot + `curl` on `/` returns HTTP 200 — 83eeb0c
 
 #### Manual
 

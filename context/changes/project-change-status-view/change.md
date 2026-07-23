@@ -1,7 +1,7 @@
 ---
 change_id: project-change-status-view
 title: Add a project path and see per-change status
-status: implementing
+status: implemented
 created: 2026-07-23
 updated: 2026-07-23
 archived_at: null
