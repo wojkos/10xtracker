@@ -7,5 +7,16 @@
 <body>
   <h1>10xDevTracker</h1>
   <p>Foundation scaffold is running.</p>
+
+  <form id="add-project-form">
+    <label for="project-path">Project path</label>
+    <input type="text" id="project-path" name="path" placeholder="D:\path\to\project" required />
+    <button type="submit">Add project</button>
+  </form>
+  <p id="add-project-error" role="alert"></p>
+
+  <div id="projects"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>

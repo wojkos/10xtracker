@@ -216,8 +216,8 @@ None — greenfield feature, no existing tracked-project data or deployed instan
 
 #### Automated
 
-- [x] 2.1 `uv run pytest tests/test_api.py -v` passes
-- [x] 2.2 `uv run python -c "import app.main"` succeeds
+- [x] 2.1 `uv run pytest tests/test_api.py -v` passes — 7d8380c
+- [x] 2.2 `uv run python -c "import app.main"` succeeds — 7d8380c
 
 #### Manual
 
@@ -228,8 +228,8 @@ None — greenfield feature, no existing tracked-project data or deployed instan
 
 #### Automated
 
-- [ ] 3.1 `uv run python -c "import app.main"` succeeds
-- [ ] 3.2 Background server boot + `curl` on `/` returns HTTP 200
+- [x] 3.1 `uv run python -c "import app.main"` succeeds
+- [x] 3.2 Background server boot + `curl` on `/` returns HTTP 200
 
 #### Manual
 
