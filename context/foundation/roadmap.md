@@ -33,7 +33,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | proposed |
 | S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | proposed |
 | S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | done     |
-| S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | proposed |
+| S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | done |
 | S-07 | sync-all-projects             | sync all added projects at once                                    | S-02, S-06      | FR-007                | proposed |
 | S-08 | configure-autosync-interval   | configure an autosync interval for automatic refreshes             | S-07            | FR-008                | proposed |
 
@@ -147,7 +147,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Re-runs the S-01 read path on demand; low risk on its own, but it's the single-project refresh mechanism that S-07 (sync all) and S-08 (autosync) both build on, so it's sequenced before them.
-- **Status:** proposed
+- **Status:** done
 
 ### S-07: Sync all projects at once
 
@@ -206,3 +206,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-01: user can add a project path from the UI and see that project's changes, each with its status (new/in-progress/done), read from `change.md`.** — Archived 2026-07-23 → `context/archive/2026-07-23-project-change-status-view/`. Lesson: —.
 - **S-05: remove a project from the app's tracked list.** — Archived 2026-07-23 → `context/archive/2026-07-23-remove-project/`. Lesson: —.
 - **S-02: user can view the list of added projects with aggregated status counts (e.g., "2 New, 1 In Progress, 3 Done").** — Archived 2026-07-23 → `context/archive/2026-07-23-project-list-aggregate-status/`. Lesson: —.
+- **S-06: manually sync a single project to refresh its status.** — Archived 2026-07-23 → `context/archive/2026-07-23-manual-single-project-sync/`. Lesson: —.

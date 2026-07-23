@@ -1,10 +1,10 @@
 ---
 change_id: manual-single-project-sync
 title: Add manual sync button for individual projects
-status: impl_reviewed
+status: archived
 created: 2026-07-23
 updated: 2026-07-23
-archived_at: null
+archived_at: 2026-07-23T13:56:36Z
 ---
 
 ## Notes
