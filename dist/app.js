@@ -1,4 +1,24 @@
 const loadingProjects = new Set();
+let expandedState = {};
+
+function loadExpandedState() {
+  try {
+    const saved = localStorage.getItem("expanded_projects");
+    expandedState = saved ? JSON.parse(saved) : {};
+  } catch {
+    expandedState = {};
+  }
+  return expandedState;
+}
+
+function saveExpandedState(state) {
+  expandedState = state;
+  try {
+    localStorage.setItem("expanded_projects", JSON.stringify(state));
+  } catch {
+    console.error("Failed to save expanded state to localStorage");
+  }
+}
 
 function getStatusBucket(status) {
   if (status === "new" || status === "preparing") return "new";
@@ -74,6 +94,20 @@ function renderProjectSection(project) {
   controls.appendChild(loadingIndicator);
 
   header.appendChild(controls);
+
+  header.addEventListener("click", (e) => {
+    if (e.target.closest(".project-controls")) {
+      return;
+    }
+    details.hidden = !details.hidden;
+    if (details.hidden) {
+      delete expandedState[project.path];
+    } else {
+      expandedState[project.path] = true;
+    }
+    saveExpandedState(expandedState);
+  });
+
   article.appendChild(header);
 
   const details = document.createElement("div");
