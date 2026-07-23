@@ -34,3 +34,16 @@ def add_tracked_project(path: Path) -> Path:
     tracked.append(resolved)
     save_tracked_projects(tracked)
     return resolved
+
+
+def remove_tracked_project(path: Path) -> None:
+    resolved = path.resolve()
+    tracked = load_tracked_projects()
+    remaining = [
+        existing
+        for existing in tracked
+        if existing.resolve().as_posix().lower() != resolved.as_posix().lower()
+    ]
+    if len(remaining) == len(tracked):
+        raise ValueError(f"'{path}' is not tracked")
+    save_tracked_projects(remaining)
