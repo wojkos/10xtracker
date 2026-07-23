@@ -1,10 +1,10 @@
 ---
 change_id: project-list-aggregate-status
 title: See aggregated status counts across all tracked projects
-status: implemented
+status: archived
 created: 2026-07-23
 updated: 2026-07-23
-archived_at: null
+archived_at: 2026-07-23T13:09:55Z
 ---
 
 ## Notes

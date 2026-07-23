@@ -173,5 +173,5 @@ None — no existing data, users, or deployed instance. This replaces an unused 
 
 #### Manual
 
-- [ ] 2.2 Browser placeholder renders with no console errors
-- [ ] 2.3 `README.md` instructions followed fresh and confirmed accurate
+- [x] 2.2 Browser placeholder renders with no console errors — cfe288f
+- [x] 2.3 `README.md` instructions followed fresh and confirmed accurate — cfe288f

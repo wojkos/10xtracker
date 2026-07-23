@@ -29,7 +29,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | ---- | ----------------------------- | ------------------------------------------------------------------ | -------------- | --------------------- | -------- |
 | F-01 | minimal-web-app-scaffold      | (foundation) a running FastAPI app serves a browser-viewable page  | —              | —                     | done     |
 | S-01 | project-change-status-view    | add a project path and see its changes with status                | F-01            | US-01, FR-001, FR-003 | done |
-| S-02 | project-list-aggregate-status | see all added projects with aggregated new/in-progress/done counts | S-01            | US-01, FR-002         | proposed |
+| S-02 | project-list-aggregate-status | see all added projects with aggregated new/in-progress/done counts | S-01            | US-01, FR-002         | done     |
 | S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | proposed |
 | S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | proposed |
 | S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | proposed |
@@ -99,7 +99,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Depends only on the per-change status data S-01 already produces; aggregation is arithmetic over that, not new parsing risk. Sequenced early because sync-all (S-07) needs a project list to iterate over.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: See phase progress within a change
 
@@ -204,3 +204,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **F-01: (foundation) a running FastAPI app serves a browser-viewable page** — Archived 2026-07-23 → `context/archive/2026-07-23-minimal-web-app-scaffold/`. Lesson: —.
 - **S-01: user can add a project path from the UI and see that project's changes, each with its status (new/in-progress/done), read from `change.md`.** — Archived 2026-07-23 → `context/archive/2026-07-23-project-change-status-view/`. Lesson: —.
+- **S-02: user can view the list of added projects with aggregated status counts (e.g., "2 New, 1 In Progress, 3 Done").** — Archived 2026-07-23 → `context/archive/2026-07-23-project-list-aggregate-status/`. Lesson: —.
