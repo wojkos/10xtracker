@@ -1,10 +1,10 @@
 ---
 change_id: minimal-web-app-scaffold
 title: Minimal web app scaffold
-status: implemented
+status: archived
 created: 2026-07-23
 updated: 2026-07-23
-archived_at: null
+archived_at: 2026-07-23T12:09:52Z
 ---
 
 ## Notes
