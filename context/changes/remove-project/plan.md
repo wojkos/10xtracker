@@ -182,8 +182,8 @@ None — no data format change; removal operates on the same `data/tracked_proje
 
 #### Automated
 
-- [ ] 3.1 `uv run python -c "import app.main"` succeeds
-- [ ] 3.2 Background server boot + `curl` on `/` returns HTTP 200
+- [x] 3.1 `uv run python -c "import app.main"` succeeds — a211f07
+- [x] 3.2 Background server boot + `curl` on `/` returns HTTP 200 — a211f07 (manually verified in browser: remove-and-persist, cancel-leaves-untouched, both confirmed working end-to-end)
 
 #### Manual
 
