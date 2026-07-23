@@ -3,6 +3,8 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel
 
+from app.plan_progress import PhaseProgress, get_phase_progress
+
 REQUIRED_FIELDS = ("change_id", "title", "status", "updated")
 
 
@@ -12,6 +14,7 @@ class ChangeSummary(BaseModel):
     status: str
     updated: str
     error: str | None = None
+    phase_progress: PhaseProgress | None = None
 
 
 def _extract_frontmatter(text: str) -> dict:
@@ -69,5 +72,7 @@ def list_changes(context_dir: Path) -> list[ChangeSummary]:
         change_md = entry / "change.md"
         if not change_md.is_file():
             continue
-        summaries.append(_parse_change_md(change_md, entry.name))
+        summary = _parse_change_md(change_md, entry.name)
+        summary.phase_progress = get_phase_progress(entry)
+        summaries.append(summary)
     return summaries

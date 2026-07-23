@@ -158,7 +158,7 @@ None — no persisted schema, no data migration; every read is fresh from disk.
 
 #### Automated
 
-- [ ] 1.1 `uv run pytest tests/test_plan_progress.py -v` passes
+- [x] 1.1 `uv run pytest tests/test_plan_progress.py -v` passes — 6eeea0d
 
 ### Phase 2: Wire into `ChangeSummary` and the API response
 

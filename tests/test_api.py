@@ -37,6 +37,38 @@ archived_at: null
     return project
 
 
+def _make_fixture_project_with_plan(tmp_path: Path) -> Path:
+    project = tmp_path / "fixture-project-with-plan"
+    changes_dir = project / "context" / "changes"
+    change_folder = changes_dir / "some-change"
+    change_folder.mkdir(parents=True)
+    (change_folder / "change.md").write_text(
+        """---
+change_id: some-change
+title: Some Change
+status: implementing
+created: 2026-07-23
+updated: 2026-07-23
+archived_at: null
+---
+""",
+        encoding="utf-8",
+    )
+    (change_folder / "plan.md").write_text(
+        """## Progress
+
+### Phase 1: Only phase
+
+#### Automated
+
+- [x] 1.1 First step — abc1234
+- [ ] 1.2 Second step
+""",
+        encoding="utf-8",
+    )
+    return project
+
+
 def test_post_valid_path_returns_parsed_changes(client: TestClient, tmp_path: Path) -> None:
     project = _make_fixture_project(tmp_path)
 
@@ -48,6 +80,29 @@ def test_post_valid_path_returns_parsed_changes(client: TestClient, tmp_path: Pa
     assert len(body["changes"]) == 1
     assert body["changes"][0]["change_id"] == "some-change"
     assert body["changes"][0]["status"] == "implementing"
+
+
+def test_post_response_includes_phase_progress(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project_with_plan(tmp_path)
+
+    response = client.post("/api/projects", json={"path": str(project)})
+
+    assert response.status_code == 200
+    body = response.json()
+    phase_progress = body["changes"][0]["phase_progress"]
+    assert phase_progress == {"phase_number": 1, "done": 1, "total": 2}
+
+
+def test_get_response_includes_phase_progress(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project_with_plan(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.get("/api/projects")
+
+    assert response.status_code == 200
+    body = response.json()
+    phase_progress = body[0]["changes"][0]["phase_progress"]
+    assert phase_progress == {"phase_number": 1, "done": 1, "total": 2}
 
 
 def test_post_path_without_context_changes_returns_400(
