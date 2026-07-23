@@ -32,7 +32,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | S-02 | project-list-aggregate-status | see all added projects with aggregated new/in-progress/done counts | S-01            | US-01, FR-002         | done     |
 | S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | proposed |
 | S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | proposed |
-| S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | proposed |
+| S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | done     |
 | S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | proposed |
 | S-07 | sync-all-projects             | sync all added projects at once                                    | S-02, S-06      | FR-007                | proposed |
 | S-08 | configure-autosync-interval   | configure an autosync interval for automatic refreshes             | S-07            | FR-008                | proposed |
@@ -135,7 +135,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Smallest, lowest-risk slice — a local-state removal action with no parsing involved. Sequenced wherever convenient; not on any critical path.
-- **Status:** proposed
+- **Status:** done
 
 ### S-06: Manually sync a single project
 
@@ -204,4 +204,5 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **F-01: (foundation) a running FastAPI app serves a browser-viewable page** — Archived 2026-07-23 → `context/archive/2026-07-23-minimal-web-app-scaffold/`. Lesson: —.
 - **S-01: user can add a project path from the UI and see that project's changes, each with its status (new/in-progress/done), read from `change.md`.** — Archived 2026-07-23 → `context/archive/2026-07-23-project-change-status-view/`. Lesson: —.
+- **S-05: remove a project from the app's tracked list.** — Archived 2026-07-23 → `context/archive/2026-07-23-remove-project/`. Lesson: —.
 - **S-02: user can view the list of added projects with aggregated status counts (e.g., "2 New, 1 In Progress, 3 Done").** — Archived 2026-07-23 → `context/archive/2026-07-23-project-list-aggregate-status/`. Lesson: —.
