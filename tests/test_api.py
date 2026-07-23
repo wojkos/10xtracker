@@ -3,13 +3,14 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from app import projects
+from app import projects, settings
 from app.main import app
 
 
 @pytest.fixture(autouse=True)
 def _isolated_data_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(projects, "DATA_FILE", tmp_path / "data" / "tracked_projects.json")
+    monkeypatch.setattr(settings, "DATA_FILE", tmp_path / "data" / "settings.json")
 
 
 @pytest.fixture()
@@ -155,4 +156,38 @@ def test_delete_never_added_path_returns_404(client: TestClient, tmp_path: Path)
     response = client.request("DELETE", "/api/projects", json={"path": str(project)})
 
     assert response.status_code == 404
+    assert "detail" in response.json()
+
+
+def test_get_settings_returns_defaults_when_nothing_saved(client: TestClient) -> None:
+    response = client.get("/api/settings")
+
+    assert response.status_code == 200
+    assert response.json() == {"enabled": False, "interval_minutes": 5}
+
+
+def test_put_settings_with_valid_payload_returns_saved_values(client: TestClient) -> None:
+    response = client.put(
+        "/api/settings", json={"enabled": True, "interval_minutes": 10}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"enabled": True, "interval_minutes": 10}
+
+
+def test_get_settings_after_put_reflects_update(client: TestClient) -> None:
+    client.put("/api/settings", json={"enabled": True, "interval_minutes": 10})
+
+    response = client.get("/api/settings")
+
+    assert response.status_code == 200
+    assert response.json() == {"enabled": True, "interval_minutes": 10}
+
+
+def test_put_settings_with_out_of_range_interval_returns_400(client: TestClient) -> None:
+    response = client.put(
+        "/api/settings", json={"enabled": True, "interval_minutes": 0}
+    )
+
+    assert response.status_code == 400
     assert "detail" in response.json()
