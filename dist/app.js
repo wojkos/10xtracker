@@ -160,7 +160,13 @@ async function syncProject(projectPath) {
     }
 
     const article = document.getElementById(`project-${projectPath}`);
+    if (!article) {
+      throw new Error("Project element not found in DOM");
+    }
     const errorDiv = article.querySelector(".sync-error");
+    if (!errorDiv) {
+      throw new Error("Error display element not found");
+    }
     errorDiv.textContent = "";
 
     project.aggregates = getAggregates(project.changes);
@@ -191,6 +197,9 @@ async function syncProject(projectPath) {
     oldStats.replaceWith(newStats);
 
     const changesList = article.querySelector(".details ul");
+    if (!changesList) {
+      throw new Error("Changes list element not found");
+    }
     changesList.innerHTML = "";
     for (const change of project.changes) {
       const item = document.createElement("li");
@@ -201,7 +210,11 @@ async function syncProject(projectPath) {
     }
   } catch (error) {
     const errorDiv = document.getElementById(`sync-error-${projectPath}`);
-    errorDiv.textContent = `Refresh failed: ${error.message}`;
+    if (!errorDiv) {
+      console.error(`Sync failed for ${projectPath}: ${error.message}`);
+    } else {
+      errorDiv.textContent = `Refresh failed: ${error.message}`;
+    }
   } finally {
     loadingProjects.delete(projectPath);
     updateProjectUI(projectPath);
@@ -222,6 +235,9 @@ function updateProjectUI(projectPath) {
 
 async function loadProjects() {
   const response = await fetch("/api/projects");
+  if (!response.ok) {
+    throw new Error(`Failed to load projects: HTTP ${response.status}`);
+  }
   const projects = await response.json();
   renderProjects(projects);
 }
@@ -240,8 +256,15 @@ function applyExpandedState() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   loadExpandedState();
-  await loadProjects();
-  applyExpandedState();
+  try {
+    await loadProjects();
+    applyExpandedState();
+  } catch (error) {
+    console.error("Failed to load projects:", error);
+    const projectsContainer = document.getElementById("projects");
+    projectsContainer.innerHTML =
+      '<p style="color: red;">Failed to load projects. Please refresh the page.</p>';
+  }
 
   const form = document.getElementById("add-project-form");
   const input = document.getElementById("project-path");
@@ -251,20 +274,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     event.preventDefault();
     errorEl.textContent = "";
 
-    const response = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: input.value }),
-    });
-    const body = await response.json();
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: input.value }),
+      });
+      const body = await response.json();
 
-    if (!response.ok) {
-      errorEl.textContent = body.detail || "Failed to add project.";
-      return;
+      if (!response.ok) {
+        errorEl.textContent = body.detail || "Failed to add project.";
+        return;
+      }
+
+      input.value = "";
+      await loadProjects();
+      applyExpandedState();
+    } catch (error) {
+      errorEl.textContent = `Error: ${error.message}`;
     }
-
-    input.value = "";
-    await loadProjects();
-    applyExpandedState();
   });
 });
