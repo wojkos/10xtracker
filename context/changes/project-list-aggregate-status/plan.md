@@ -234,8 +234,8 @@ None — the new UI replaces the existing full-list view. No data migration or d
 
 #### Automated
 
-- [x] 3.1 `dist/app.js`: `loadExpandedState()` and `saveExpandedState()` functions added
-- [x] 3.2 `dist/app.js`: click handlers wire expand/collapse behavior
+- [x] 3.1 `dist/app.js`: `loadExpandedState()` and `saveExpandedState()` functions added — 57a719f
+- [x] 3.2 `dist/app.js`: click handlers wire expand/collapse behavior — 57a719f
 
 #### Manual
 
