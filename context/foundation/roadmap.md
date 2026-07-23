@@ -28,7 +28,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | ID   | Change ID                    | Outcome (user can …)                                              | Prerequisites | PRD refs             | Status   |
 | ---- | ----------------------------- | ------------------------------------------------------------------ | -------------- | --------------------- | -------- |
 | F-01 | minimal-web-app-scaffold      | (foundation) a running FastAPI app serves a browser-viewable page  | —              | —                     | done     |
-| S-01 | project-change-status-view    | add a project path and see its changes with status                | F-01            | US-01, FR-001, FR-003 | proposed |
+| S-01 | project-change-status-view    | add a project path and see its changes with status                | F-01            | US-01, FR-001, FR-003 | done |
 | S-02 | project-list-aggregate-status | see all added projects with aggregated new/in-progress/done counts | S-01            | US-01, FR-002         | proposed |
 | S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | proposed |
 | S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | proposed |
@@ -87,7 +87,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** This is the north star — sequenced first because it proves the hardest and most valuable part (correctly parsing `change.md` into an interpreted status) with the smallest possible surface area. A wrong parsing model here would ripple into every later slice.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: See aggregated status across all added projects
 
@@ -203,3 +203,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Done
 
 - **F-01: (foundation) a running FastAPI app serves a browser-viewable page** — Archived 2026-07-23 → `context/archive/2026-07-23-minimal-web-app-scaffold/`. Lesson: —.
+- **S-01: user can add a project path from the UI and see that project's changes, each with its status (new/in-progress/done), read from `change.md`.** — Archived 2026-07-23 → `context/archive/2026-07-23-project-change-status-view/`. Lesson: —.
