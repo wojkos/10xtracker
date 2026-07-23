@@ -1,5 +1,6 @@
 const loadingProjects = new Set();
 let expandedState = {};
+let autosyncTimerId = null;
 
 function loadExpandedState() {
   try {
@@ -28,6 +29,11 @@ function getStatusBucket(status) {
   return "unknown";
 }
 
+function formatPhaseProgress(phaseProgress) {
+  if (!phaseProgress) return "";
+  return ` — Phase ${phaseProgress.phase_number}: ${phaseProgress.done}/${phaseProgress.total}`;
+}
+
 function getAggregates(changes) {
   const aggregates = { new: 0, in_progress: 0, done: 0, blocked: 0 };
   for (const change of changes) {
@@ -48,8 +54,13 @@ function renderProjectSection(project) {
   const header = document.createElement("header");
 
   const heading = document.createElement("h2");
-  heading.textContent = `${project.name} (${project.path})`;
+  heading.textContent = project.name;
   header.appendChild(heading);
+
+  const projectPath = document.createElement("p");
+  projectPath.className = "summary-stats project-path";
+  projectPath.textContent = project.path;
+  header.appendChild(projectPath);
 
   const aggregates = project.aggregates || { new: 0, in_progress: 0, done: 0, blocked: 0 };
   const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
@@ -114,7 +125,7 @@ function renderProjectSection(project) {
     const item = document.createElement("li");
     item.textContent = change.error
       ? `${change.change_id}: error — ${change.error}`
-      : `${change.title} [${change.status}] — updated ${change.updated}`;
+      : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}`;
     list.appendChild(item);
   }
   details.appendChild(list);
@@ -214,7 +225,7 @@ async function syncProject(projectPath) {
       const item = document.createElement("li");
       item.textContent = change.error
         ? `${change.change_id}: error — ${change.error}`
-        : `${change.title} [${change.status}] — updated ${change.updated}`;
+        : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}`;
       changesList.appendChild(item);
     }
   } catch (error) {
@@ -282,6 +293,58 @@ async function loadProjects() {
   renderProjects(projects);
 }
 
+function scheduleAutosync(enabled, intervalMinutes) {
+  if (autosyncTimerId !== null) {
+    clearInterval(autosyncTimerId);
+    autosyncTimerId = null;
+  }
+  if (enabled) {
+    autosyncTimerId = setInterval(autosyncAll, intervalMinutes * 60 * 1000);
+  }
+}
+
+async function autosyncAll() {
+  const paths = Array.from(document.querySelectorAll("article[data-project-path]")).map(
+    (article) => article.getAttribute("data-project-path")
+  );
+  for (const path of paths) {
+    await syncProject(path);
+  }
+}
+
+async function loadAutosyncSettings() {
+  const response = await fetch("/api/settings");
+  if (!response.ok) {
+    throw new Error(`Failed to load settings: HTTP ${response.status}`);
+  }
+  const { enabled, interval_minutes } = await response.json();
+  document.getElementById("autosync-enabled").checked = enabled;
+  document.getElementById("autosync-interval").value = interval_minutes;
+  scheduleAutosync(enabled, interval_minutes);
+}
+
+async function saveAutosyncSettings(enabled, intervalMinutes) {
+  const errorEl = document.getElementById("autosync-error");
+  try {
+    const response = await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled, interval_minutes: intervalMinutes }),
+    });
+    const body = await response.json();
+
+    if (!response.ok) {
+      errorEl.textContent = body.detail || "Failed to save autosync settings.";
+      return;
+    }
+
+    errorEl.textContent = "";
+    scheduleAutosync(enabled, intervalMinutes);
+  } catch (error) {
+    errorEl.textContent = `Error: ${error.message}`;
+  }
+}
+
 function applyExpandedState() {
   for (const article of document.querySelectorAll("article[data-project-path]")) {
     const path = article.getAttribute("data-project-path");
@@ -334,4 +397,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       errorEl.textContent = `Error: ${error.message}`;
     }
   });
+
+  const autosyncEnabledEl = document.getElementById("autosync-enabled");
+  const autosyncIntervalEl = document.getElementById("autosync-interval");
+  const autosyncErrorEl = document.getElementById("autosync-error");
+
+  function handleAutosyncControlChange() {
+    const enabled = autosyncEnabledEl.checked;
+    const intervalMinutes = Number(autosyncIntervalEl.value);
+
+    if (!Number.isInteger(intervalMinutes) || intervalMinutes < 1 || intervalMinutes > 1440) {
+      autosyncErrorEl.textContent = "Interval must be a whole number between 1 and 1440 minutes.";
+      return;
+    }
+
+    autosyncErrorEl.textContent = "";
+    saveAutosyncSettings(enabled, intervalMinutes);
+  }
+
+  autosyncEnabledEl.addEventListener("change", handleAutosyncControlChange);
+  autosyncIntervalEl.addEventListener("change", handleAutosyncControlChange);
+
+  try {
+    await loadAutosyncSettings();
+  } catch (error) {
+    console.error("Failed to load autosync settings:", error);
+  }
 });

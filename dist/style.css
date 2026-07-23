@@ -72,6 +72,24 @@ body {
   background-color: #eadbcb;
 }
 
+#autosync-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+}
+
+#autosync-error {
+  color: var(--text-error);
+  font-size: 0.9rem;
+}
+
 #add-project-form {
   margin-top: 1rem;
   padding: 1rem;
@@ -153,8 +171,12 @@ article header {
 }
 
 article h2 {
-  margin: 0 0 0.5em 0;
+  margin: 0;
   display: inline;
+}
+
+.project-path {
+  margin: 0.2em 0 0 0;
 }
 
 .summary-stats {

@@ -189,10 +189,10 @@ Purely additive. `data/settings.json` doesn't exist until the first save; `load_
 
 #### Automated
 
-- [x] 1.1 `uv run pytest tests/test_settings.py` passes
-- [x] 1.2 `uv run pytest tests/test_api.py` passes
-- [x] 1.3 `uv run pytest` passes (full suite, no regressions)
-- [x] 1.4 `uv run python -c "import app.main"` succeeds
+- [x] 1.1 `uv run pytest tests/test_settings.py` passes — ee01607
+- [x] 1.2 `uv run pytest tests/test_api.py` passes — ee01607
+- [x] 1.3 `uv run pytest` passes (full suite, no regressions) — ee01607
+- [x] 1.4 `uv run python -c "import app.main"` succeeds — ee01607
 
 #### Manual
 

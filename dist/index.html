@@ -8,7 +8,17 @@
 <body>
   <h1>10xDevTracker</h1>
 
-
+  <div id="autosync-controls">
+    <label for="autosync-enabled">
+      <input type="checkbox" id="autosync-enabled" />
+      Autosync
+    </label>
+    <label for="autosync-interval">
+      Interval (minutes)
+      <input type="number" id="autosync-interval" min="1" max="1440" />
+    </label>
+    <span id="autosync-error" role="alert"></span>
+  </div>
 
   <div id="projects"></div>
     <form id="add-project-form">
