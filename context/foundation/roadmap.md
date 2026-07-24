@@ -31,7 +31,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | S-01 | project-change-status-view    | add a project path and see its changes with status                | F-01            | US-01, FR-001, FR-003 | done |
 | S-02 | project-list-aggregate-status | see all added projects with aggregated new/in-progress/done counts | S-01            | US-01, FR-002         | done     |
 | S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | proposed |
-| S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | proposed |
+| S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | done     |
 | S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | done     |
 | S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | done |
 | S-07 | sync-all-projects             | sync all added projects at once                                    | S-02, S-06      | FR-007                | proposed |
@@ -123,7 +123,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Independent of S-03 (different source file, `roadmap.md` vs `plan.md`); the risk is that correlation depends on Change ID naming conventions matching between a change's `change.md` and the target project's `roadmap.md`, which this app doesn't control.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Remove a project
 
@@ -208,3 +208,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-02: user can view the list of added projects with aggregated status counts (e.g., "2 New, 1 In Progress, 3 Done").** — Archived 2026-07-23 → `context/archive/2026-07-23-project-list-aggregate-status/`. Lesson: —.
 - **S-06: manually sync a single project to refresh its status.** — Archived 2026-07-23 → `context/archive/2026-07-23-manual-single-project-sync/`. Lesson: —.
 - **S-08: configure an autosync interval for automatic refreshes** — Archived 2026-07-24 → `context/archive/2026-07-23-configure-autosync-interval/`. Lesson: —.
+- **S-04: see which roadmap items each change addresses** — Archived 2026-07-24 → `context/archive/2026-07-24-roadmap-correlation-view/`. Lesson: —.

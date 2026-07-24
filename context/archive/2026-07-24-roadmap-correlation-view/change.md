@@ -1,10 +1,10 @@
 ---
 change_id: roadmap-correlation-view
 title: See roadmap correlation per change
-status: implemented
+status: archived
 created: 2026-07-24
 updated: 2026-07-24
-archived_at: null
+archived_at: 2026-07-24T10:24:50Z
 ---
 
 ## Notes
