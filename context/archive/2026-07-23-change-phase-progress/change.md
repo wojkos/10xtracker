@@ -1,10 +1,10 @@
 ---
 change_id: change-phase-progress
 title: See phase progress within a change
-status: implemented
+status: archived
 created: 2026-07-23
-updated: 2026-07-23
-archived_at: null
+updated: 2026-07-24
+archived_at: 2026-07-24T12:48:14Z
 ---
 
 ## Notes

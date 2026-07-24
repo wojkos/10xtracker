@@ -30,7 +30,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | F-01 | minimal-web-app-scaffold      | (foundation) a running FastAPI app serves a browser-viewable page  | —              | —                     | done     |
 | S-01 | project-change-status-view    | add a project path and see its changes with status                | F-01            | US-01, FR-001, FR-003 | done |
 | S-02 | project-list-aggregate-status | see all added projects with aggregated new/in-progress/done counts | S-01            | US-01, FR-002         | done     |
-| S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | proposed |
+| S-03 | change-phase-progress         | see phase progress within each change (e.g. "Phase 3: 4/5")        | S-01            | US-01, FR-004         | done |
 | S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | done     |
 | S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | done     |
 | S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | done |
@@ -111,7 +111,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Extends the parsing model from S-01 to a second file type (`plan.md`); the main risk is `plan.md` format drift across projects, which only becomes visible once real project data is tried against it.
-- **Status:** proposed
+- **Status:** done
 
 ### S-04: See roadmap correlation per change
 
@@ -209,3 +209,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-06: manually sync a single project to refresh its status.** — Archived 2026-07-23 → `context/archive/2026-07-23-manual-single-project-sync/`. Lesson: —.
 - **S-08: configure an autosync interval for automatic refreshes** — Archived 2026-07-24 → `context/archive/2026-07-23-configure-autosync-interval/`. Lesson: —.
 - **S-04: see which roadmap items each change addresses** — Archived 2026-07-24 → `context/archive/2026-07-24-roadmap-correlation-view/`. Lesson: —.
+- **S-03: user can see phase progress within each change (current phase, tasks completed / total), read from `plan.md`.** — Archived 2026-07-24 → `context/archive/2026-07-23-change-phase-progress/`. Lesson: —.
