@@ -3,7 +3,7 @@ project: 10xDevTracker
 version: 1
 status: draft
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-07-24
 prd_version: 1
 main_goal: low-complexity
 top_blocker: none
@@ -35,7 +35,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | done     |
 | S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | done |
 | S-07 | sync-all-projects             | sync all added projects at once                                    | S-02, S-06      | FR-007                | proposed |
-| S-08 | configure-autosync-interval   | configure an autosync interval for automatic refreshes             | S-07            | FR-008                | proposed |
+| S-08 | configure-autosync-interval   | configure an autosync interval for automatic refreshes             | S-07            | FR-008                | done     |
 
 ## Streams
 
@@ -171,7 +171,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Autosync is sync-all on a timer; building it before sync-all exists would mean building the same iteration logic twice. Sequenced last since it's pure automation over an already-working manual sync.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -207,3 +207,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-05: remove a project from the app's tracked list.** — Archived 2026-07-23 → `context/archive/2026-07-23-remove-project/`. Lesson: —.
 - **S-02: user can view the list of added projects with aggregated status counts (e.g., "2 New, 1 In Progress, 3 Done").** — Archived 2026-07-23 → `context/archive/2026-07-23-project-list-aggregate-status/`. Lesson: —.
 - **S-06: manually sync a single project to refresh its status.** — Archived 2026-07-23 → `context/archive/2026-07-23-manual-single-project-sync/`. Lesson: —.
+- **S-08: configure an autosync interval for automatic refreshes** — Archived 2026-07-24 → `context/archive/2026-07-23-configure-autosync-interval/`. Lesson: —.

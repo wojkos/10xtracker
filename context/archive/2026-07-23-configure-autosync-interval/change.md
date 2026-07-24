@@ -1,10 +1,10 @@
 ---
 change_id: configure-autosync-interval
 title: Configure autosync interval
-status: implemented
+status: archived
 created: 2026-07-23
-updated: 2026-07-23
-archived_at: null
+updated: 2026-07-24
+archived_at: 2026-07-24T00:00:00Z
 ---
 
 ## Notes
