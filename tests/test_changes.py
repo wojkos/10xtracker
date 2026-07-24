@@ -15,6 +15,12 @@ def _write_plan_md(changes_dir: Path, change_id: str, content: str) -> None:
     (folder / "plan.md").write_text(content, encoding="utf-8")
 
 
+def _write_roadmap_md(context_dir: Path, content: str) -> None:
+    foundation_dir = context_dir / "foundation"
+    foundation_dir.mkdir(parents=True, exist_ok=True)
+    (foundation_dir / "roadmap.md").write_text(content, encoding="utf-8")
+
+
 def test_valid_change_md(tmp_path: Path) -> None:
     context_dir = tmp_path / "context"
     changes_dir = context_dir / "changes"
@@ -42,6 +48,7 @@ archived_at: null
     assert summary.updated == "2026-07-23"
     assert summary.error is None
     assert summary.phase_progress is None
+    assert summary.roadmap_correlation is None
 
 
 def test_phase_progress_populated_when_plan_md_has_progress(tmp_path: Path) -> None:
@@ -148,6 +155,73 @@ updated: 2026-07-23
     assert result[0].change_id == "missing-status"
     assert result[0].error is not None
     assert "status" in result[0].error
+
+
+def test_roadmap_correlation_populated_when_matching_row_exists(tmp_path: Path) -> None:
+    context_dir = tmp_path / "context"
+    changes_dir = context_dir / "changes"
+    _write_change_md(
+        changes_dir,
+        "some-change",
+        """---
+change_id: some-change
+title: Some Change
+status: implementing
+created: 2026-07-23
+updated: 2026-07-23
+archived_at: null
+---
+""",
+    )
+    _write_roadmap_md(
+        context_dir,
+        """## At a glance
+
+| ID   | Change ID   | Outcome (user can ...) | Prerequisites | PRD refs | Status |
+| ---- | ----------- | ----------------------- | -------------- | -------- | ------ |
+| S-04 | some-change | do the thing            | -              | -        | done   |
+""",
+    )
+
+    result = list_changes(context_dir)
+
+    assert len(result) == 1
+    correlation = result[0].roadmap_correlation
+    assert correlation is not None
+    assert correlation.roadmap_id == "S-04"
+    assert correlation.outcome == "do the thing"
+
+
+def test_roadmap_correlation_is_none_when_change_id_not_in_roadmap(tmp_path: Path) -> None:
+    context_dir = tmp_path / "context"
+    changes_dir = context_dir / "changes"
+    _write_change_md(
+        changes_dir,
+        "untracked-change",
+        """---
+change_id: untracked-change
+title: Untracked Change
+status: new
+created: 2026-07-23
+updated: 2026-07-23
+archived_at: null
+---
+""",
+    )
+    _write_roadmap_md(
+        context_dir,
+        """## At a glance
+
+| ID   | Change ID   | Outcome (user can ...) | Prerequisites | PRD refs | Status |
+| ---- | ----------- | ----------------------- | -------------- | -------- | ------ |
+| S-04 | some-change | do the thing            | -              | -        | done   |
+""",
+    )
+
+    result = list_changes(context_dir)
+
+    assert len(result) == 1
+    assert result[0].roadmap_correlation is None
 
 
 def test_folder_without_change_md_is_skipped(tmp_path: Path) -> None:

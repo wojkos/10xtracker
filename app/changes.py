@@ -4,6 +4,7 @@ import yaml
 from pydantic import BaseModel
 
 from app.plan_progress import PhaseProgress, get_phase_progress
+from app.roadmap_correlation import RoadmapCorrelation, get_roadmap_correlations
 
 REQUIRED_FIELDS = ("change_id", "title", "status", "updated")
 
@@ -15,6 +16,7 @@ class ChangeSummary(BaseModel):
     updated: str
     error: str | None = None
     phase_progress: PhaseProgress | None = None
+    roadmap_correlation: RoadmapCorrelation | None = None
 
 
 def _extract_frontmatter(text: str) -> dict:
@@ -65,6 +67,8 @@ def list_changes(context_dir: Path) -> list[ChangeSummary]:
     if not changes_dir.is_dir():
         return []
 
+    correlations = get_roadmap_correlations(context_dir)
+
     summaries = []
     for entry in sorted(changes_dir.iterdir()):
         if not entry.is_dir():
@@ -74,5 +78,6 @@ def list_changes(context_dir: Path) -> list[ChangeSummary]:
             continue
         summary = _parse_change_md(change_md, entry.name)
         summary.phase_progress = get_phase_progress(entry)
+        summary.roadmap_correlation = correlations.get(summary.change_id)
         summaries.append(summary)
     return summaries

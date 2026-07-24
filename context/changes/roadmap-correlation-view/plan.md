@@ -156,14 +156,14 @@ None — no persisted schema, no data migration; every read is fresh from disk.
 
 #### Automated
 
-- [x] 1.1 `uv run pytest tests/test_roadmap_correlation.py -v` passes
+- [x] 1.1 `uv run pytest tests/test_roadmap_correlation.py -v` passes — 0e4e3e1
 
 ### Phase 2: Wire into `ChangeSummary` and the API response
 
 #### Automated
 
-- [ ] 2.1 `uv run pytest tests/test_changes.py -v` passes
-- [ ] 2.2 `uv run pytest tests/test_api.py -v` passes
+- [x] 2.1 `uv run pytest tests/test_changes.py -v` passes
+- [x] 2.2 `uv run pytest tests/test_api.py -v` passes
 
 ### Phase 3: Frontend rendering
 

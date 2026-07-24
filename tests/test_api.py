@@ -70,6 +70,37 @@ archived_at: null
     return project
 
 
+def _make_fixture_project_with_roadmap(tmp_path: Path) -> Path:
+    project = tmp_path / "fixture-project-with-roadmap"
+    changes_dir = project / "context" / "changes"
+    change_folder = changes_dir / "some-change"
+    change_folder.mkdir(parents=True)
+    (change_folder / "change.md").write_text(
+        """---
+change_id: some-change
+title: Some Change
+status: implementing
+created: 2026-07-23
+updated: 2026-07-23
+archived_at: null
+---
+""",
+        encoding="utf-8",
+    )
+    foundation_dir = project / "context" / "foundation"
+    foundation_dir.mkdir(parents=True)
+    (foundation_dir / "roadmap.md").write_text(
+        """## At a glance
+
+| ID   | Change ID   | Outcome (user can ...) | Prerequisites | PRD refs | Status |
+| ---- | ----------- | ----------------------- | -------------- | -------- | ------ |
+| S-04 | some-change | do the thing            | -              | -        | done   |
+""",
+        encoding="utf-8",
+    )
+    return project
+
+
 def test_post_valid_path_returns_parsed_changes(client: TestClient, tmp_path: Path) -> None:
     project = _make_fixture_project(tmp_path)
 
@@ -104,6 +135,29 @@ def test_get_response_includes_phase_progress(client: TestClient, tmp_path: Path
     body = response.json()
     phase_progress = body[0]["changes"][0]["phase_progress"]
     assert phase_progress == {"phase_number": 1, "done": 1, "total": 2}
+
+
+def test_post_response_includes_roadmap_correlation(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project_with_roadmap(tmp_path)
+
+    response = client.post("/api/projects", json={"path": str(project)})
+
+    assert response.status_code == 200
+    body = response.json()
+    roadmap_correlation = body["changes"][0]["roadmap_correlation"]
+    assert roadmap_correlation == {"roadmap_id": "S-04", "outcome": "do the thing"}
+
+
+def test_get_response_includes_roadmap_correlation(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project_with_roadmap(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.get("/api/projects")
+
+    assert response.status_code == 200
+    body = response.json()
+    roadmap_correlation = body[0]["changes"][0]["roadmap_correlation"]
+    assert roadmap_correlation == {"roadmap_id": "S-04", "outcome": "do the thing"}
 
 
 def test_post_path_without_context_changes_returns_400(
