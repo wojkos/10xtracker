@@ -35,6 +35,11 @@ function formatPhaseProgress(phaseProgress) {
   return ` — Phase ${phaseProgress.phase_number}: ${phaseProgress.done}/${phaseProgress.total}`;
 }
 
+function formatRoadmapCorrelation(roadmapCorrelation) {
+  if (!roadmapCorrelation) return "";
+  return ` — ${roadmapCorrelation.roadmap_id}: ${roadmapCorrelation.outcome}`;
+}
+
 function getAggregates(changes) {
   const aggregates = { new: 0, in_progress: 0, done: 0, blocked: 0 };
   for (const change of changes) {
@@ -126,7 +131,7 @@ function renderProjectSection(project) {
     const item = document.createElement("li");
     item.textContent = change.error
       ? `${change.change_id}: error — ${change.error}`
-      : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}`;
+      : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}${formatRoadmapCorrelation(change.roadmap_correlation)}`;
     list.appendChild(item);
   }
   details.appendChild(list);
@@ -226,7 +231,7 @@ async function syncProject(projectPath) {
       const item = document.createElement("li");
       item.textContent = change.error
         ? `${change.change_id}: error — ${change.error}`
-        : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}`;
+        : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}${formatRoadmapCorrelation(change.roadmap_correlation)}`;
       changesList.appendChild(item);
     }
     return { path: projectPath, success: true };

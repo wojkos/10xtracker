@@ -162,14 +162,14 @@ None — no persisted schema, no data migration; every read is fresh from disk.
 
 #### Automated
 
-- [x] 2.1 `uv run pytest tests/test_changes.py -v` passes
-- [x] 2.2 `uv run pytest tests/test_api.py -v` passes
+- [x] 2.1 `uv run pytest tests/test_changes.py -v` passes — 976474a
+- [x] 2.2 `uv run pytest tests/test_api.py -v` passes — 976474a
 
 ### Phase 3: Frontend rendering
 
 #### Automated
 
-- [ ] 3.1 `uv run python -c "import app.main"` succeeds
+- [x] 3.1 `uv run python -c "import app.main"` succeeds
 
 #### Manual
 
