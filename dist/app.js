@@ -66,7 +66,7 @@ function renderProjectSection(project) {
   const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
 
   const summaryStats = document.createElement("p");
-  summaryStats.className = "summary-stats";
+  summaryStats.className = "summary-stats aggregate-stats";
   summaryStats.textContent = countStr;
 
   if (aggregates.blocked > 0) {
@@ -192,12 +192,12 @@ async function syncProject(projectPath) {
     project.aggregates = getAggregates(project.changes);
 
     const header = article.querySelector("header");
-    const oldStats = header.querySelector(".summary-stats");
+    const oldStats = header.querySelector(".aggregate-stats");
     const aggregates = project.aggregates;
     const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
 
     const newStats = document.createElement("p");
-    newStats.className = "summary-stats";
+    newStats.className = "summary-stats aggregate-stats";
     newStats.textContent = countStr;
 
     if (aggregates.blocked > 0) {
