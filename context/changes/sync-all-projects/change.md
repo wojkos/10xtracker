@@ -1,6 +1,7 @@
 ---
+change_id: sync-all-projects
 title: Sync All Projects
-status: implemented
+status: impl_reviewed
 created: 2026-07-24
 updated: 2026-07-24
 description: Add a global "Sync All" button to refresh all projects concurrently
