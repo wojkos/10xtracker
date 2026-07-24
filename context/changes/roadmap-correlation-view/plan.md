@@ -169,7 +169,7 @@ None — no persisted schema, no data migration; every read is fresh from disk.
 
 #### Automated
 
-- [x] 3.1 `uv run python -c "import app.main"` succeeds
+- [x] 3.1 `uv run python -c "import app.main"` succeeds — 34e23dd
 
 #### Manual
 
