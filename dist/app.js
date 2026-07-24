@@ -1,6 +1,7 @@
 const loadingProjects = new Set();
 let expandedState = {};
 let autosyncTimerId = null;
+let syncingAll = false;
 
 function loadExpandedState() {
   try {
