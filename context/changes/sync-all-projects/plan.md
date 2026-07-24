@@ -273,8 +273,8 @@ None. This is a pure frontend addition with no data model changes or migrations.
 
 #### Automated
 
-- [x] 1.1 HTML validates without errors
-- [x] 1.2 No JavaScript syntax errors in app.js
+- [x] 1.1 HTML validates without errors — bddffd6
+- [x] 1.2 No JavaScript syntax errors in app.js — bddffd6
 
 #### Manual
 
@@ -285,8 +285,8 @@ None. This is a pure frontend addition with no data model changes or migrations.
 
 #### Automated
 
-- [ ] 2.1 No JavaScript syntax errors after modifications
-- [ ] 2.2 Existing functionality still works (per-project refresh still functions)
+- [x] 2.1 No JavaScript syntax errors after modifications
+- [x] 2.2 Existing functionality still works (per-project refresh still functions)
 
 #### Manual
 

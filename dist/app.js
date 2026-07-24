@@ -229,6 +229,7 @@ async function syncProject(projectPath) {
         : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}`;
       changesList.appendChild(item);
     }
+    return { path: projectPath, success: true };
   } catch (error) {
     const errorDiv = document.getElementById(`sync-error-${projectPath}`);
     if (!errorDiv) {
@@ -236,9 +237,58 @@ async function syncProject(projectPath) {
     } else {
       errorDiv.textContent = `Refresh failed: ${error.message}`;
     }
+    return { path: projectPath, success: false, error: error.message };
   } finally {
     loadingProjects.delete(projectPath);
     updateProjectUI(projectPath);
+  }
+}
+
+async function syncAllProjects() {
+  if (syncingAll) return;
+
+  const projectElements = document.querySelectorAll("article[data-project-path]");
+  const projectPaths = Array.from(projectElements).map(el => el.getAttribute("data-project-path"));
+
+  if (projectPaths.length === 0) {
+    const statusEl = document.getElementById("sync-all-status");
+    statusEl.textContent = "No projects to sync";
+    return;
+  }
+
+  syncingAll = true;
+  const syncAllBtn = document.getElementById("sync-all-btn");
+  syncAllBtn.disabled = true;
+
+  for (const path of projectPaths) {
+    updateProjectUI(path);
+  }
+
+  const statusEl = document.getElementById("sync-all-status");
+  statusEl.textContent = "";
+
+  const promises = projectPaths.map(path => syncProject(path));
+  const results = await Promise.allSettled(promises);
+
+  const successes = results.filter(r => r.status === "fulfilled" && r.value.success).length;
+  const failures = results.filter(r => r.status === "fulfilled" && !r.value.success).length;
+  const total = projectPaths.length;
+
+  let statusMessage = `Synced ${successes}/${total} projects`;
+  if (failures > 0) {
+    const failedProjects = results
+      .filter(r => r.status === "fulfilled" && !r.value.success)
+      .map(r => `${r.value.path}: ${r.value.error}`)
+      .join(", ");
+    statusMessage += `. Failed: ${failedProjects}`;
+  }
+
+  statusEl.textContent = statusMessage;
+
+  syncingAll = false;
+  syncAllBtn.disabled = false;
+  for (const path of projectPaths) {
+    updateProjectUI(path);
   }
 }
 
@@ -281,7 +331,7 @@ function updateProjectUI(projectPath) {
   const loadingIndicator = section.querySelector(".loading-indicator");
 
   const isLoading = loadingProjects.has(projectPath);
-  refreshBtn.disabled = isLoading;
+  refreshBtn.disabled = isLoading || syncingAll;
   loadingIndicator.style.display = isLoading ? "inline-block" : "none";
 }
 
@@ -369,6 +419,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     projectsContainer.innerHTML =
       '<p style="color: red;">Failed to load projects. Please refresh the page.</p>';
   }
+
+  const syncAllBtn = document.getElementById("sync-all-btn");
+  syncAllBtn.addEventListener("click", syncAllProjects);
 
   const form = document.getElementById("add-project-form");
   const input = document.getElementById("project-path");
