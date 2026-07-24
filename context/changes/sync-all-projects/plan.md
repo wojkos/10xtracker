@@ -300,7 +300,7 @@ None. This is a pure frontend addition with no data model changes or migrations.
 
 #### Automated
 
-- [x] 3.1 CSS parses without errors
+- [x] 3.1 CSS parses without errors — 3e10d39
 
 #### Manual
 

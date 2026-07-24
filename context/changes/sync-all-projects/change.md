@@ -1,6 +1,6 @@
 ---
 title: Sync All Projects
-status: implementing
+status: implemented
 created: 2026-07-24
 updated: 2026-07-24
 description: Add a global "Sync All" button to refresh all projects concurrently
