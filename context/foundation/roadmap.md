@@ -34,7 +34,7 @@ Solo developers using the 10xDEV framework across multiple local project directo
 | S-04 | roadmap-correlation-view      | see which roadmap items each change addresses                     | S-01            | US-01, FR-005         | done     |
 | S-05 | remove-project                | remove a project from the app                                     | S-01            | FR-009                | done     |
 | S-06 | manual-single-project-sync    | manually sync a single project to refresh its status               | S-01            | FR-006                | done |
-| S-07 | sync-all-projects             | sync all added projects at once                                    | S-02, S-06      | FR-007                | proposed |
+| S-07 | sync-all-projects             | sync all added projects at once                                    | S-02, S-06      | FR-007                | done     |
 | S-08 | configure-autosync-interval   | configure an autosync interval for automatic refreshes             | S-07            | FR-008                | done     |
 
 ## Streams
@@ -159,7 +159,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Needs both the project list (S-02) to know what to iterate over and the single-project sync mechanism (S-06) to reuse per project — sequenced after both rather than reimplementing either.
-- **Status:** proposed
+- **Status:** done
 
 ### S-08: Configure autosync interval
 
@@ -209,4 +209,5 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-06: manually sync a single project to refresh its status.** — Archived 2026-07-23 → `context/archive/2026-07-23-manual-single-project-sync/`. Lesson: —.
 - **S-08: configure an autosync interval for automatic refreshes** — Archived 2026-07-24 → `context/archive/2026-07-23-configure-autosync-interval/`. Lesson: —.
 - **S-04: see which roadmap items each change addresses** — Archived 2026-07-24 → `context/archive/2026-07-24-roadmap-correlation-view/`. Lesson: —.
+- **S-07: user can trigger a sync of all added projects in one action.** — Archived 2026-07-24 → `context/archive/2026-07-24-sync-all-projects/`. Lesson: —.
 - **S-03: user can see phase progress within each change (current phase, tasks completed / total), read from `plan.md`.** — Archived 2026-07-24 → `context/archive/2026-07-23-change-phase-progress/`. Lesson: —.
