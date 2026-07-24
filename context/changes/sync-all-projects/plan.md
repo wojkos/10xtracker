@@ -285,8 +285,8 @@ None. This is a pure frontend addition with no data model changes or migrations.
 
 #### Automated
 
-- [x] 2.1 No JavaScript syntax errors after modifications
-- [x] 2.2 Existing functionality still works (per-project refresh still functions)
+- [x] 2.1 No JavaScript syntax errors after modifications — 0f7568d
+- [x] 2.2 Existing functionality still works (per-project refresh still functions) — 0f7568d
 
 #### Manual
 
@@ -300,7 +300,7 @@ None. This is a pure frontend addition with no data model changes or migrations.
 
 #### Automated
 
-- [ ] 3.1 CSS parses without errors
+- [x] 3.1 CSS parses without errors
 
 #### Manual
 
