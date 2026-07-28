@@ -242,15 +242,15 @@ No stored-data migration is required. Existing tracked-project JSON and context 
 
 #### Automated
 
-- [x] 1.1 New project-status service tests prove REST and service output use the same parsed aggregate
-- [x] 1.2 Roadmap parser tests cover prerequisites, status, ordering, absent tables, and malformed rows
-- [x] 1.3 Recent-work tests cover ordering, invalid dates, limits, and tracked-project-only scope
-- [x] 1.4 Workflow tests cover every recommendation rule, eligible prerequisites, multiple-active-change ambiguity, and malformed-state blocking
+- [x] 1.1 New project-status service tests prove REST and service output use the same parsed aggregate — e41cfeb
+- [x] 1.2 Roadmap parser tests cover prerequisites, status, ordering, absent tables, and malformed rows — e41cfeb
+- [x] 1.3 Recent-work tests cover ordering, invalid dates, limits, and tracked-project-only scope — e41cfeb
+- [x] 1.4 Workflow tests cover every recommendation rule, eligible prerequisites, multiple-active-change ambiguity, and malformed-state blocking — e41cfeb
 
 #### Manual
 
-- [ ] 1.5 Inspect a fixture project with malformed `change.md` data and confirm valid records remain visible while the malformed record retains an explicit diagnostic
-- [ ] 1.6 Inspect a project with multiple active changes and confirm the service returns candidates without selecting a command
+- [x] 1.5 Inspect a fixture project with malformed `change.md` data and confirm valid records remain visible while the malformed record retains an explicit diagnostic
+- [x] 1.6 Inspect a project with multiple active changes and confirm the service returns candidates without selecting a command
 
 ### Phase 2: Authenticated MCP Transport
 

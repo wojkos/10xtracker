@@ -9,20 +9,19 @@
   <h1>10xDevTracker</h1>
 
   <div id="dashboard-controls">
+    <div id="autosync-controls">
+      <label for="autosync-enabled">
+        <input type="checkbox" id="autosync-enabled" />
+        Autosync
+      </label>
+      <label for="autosync-interval">
+        Interval (min)
+        <input type="number" id="autosync-interval" min="1" max="1440" />
+      </label>
+      <span id="autosync-error" role="alert"></span>
+    </div>
     <button id="sync-all-btn" type="button">Sync All</button>
     <span id="sync-all-status"></span>
-  </div>
-
-  <div id="autosync-controls">
-    <label for="autosync-enabled">
-      <input type="checkbox" id="autosync-enabled" />
-      Autosync
-    </label>
-    <label for="autosync-interval">
-      Interval (minutes)
-      <input type="number" id="autosync-interval" min="1" max="1440" />
-    </label>
-    <span id="autosync-error" role="alert"></span>
   </div>
 
   <div id="projects"></div>

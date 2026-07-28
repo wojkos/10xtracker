@@ -129,9 +129,31 @@ function renderProjectSection(project) {
   const list = document.createElement("ul");
   for (const change of project.changes) {
     const item = document.createElement("li");
-    item.textContent = change.error
-      ? `${change.change_id}: error — ${change.error}`
-      : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}${formatRoadmapCorrelation(change.roadmap_correlation)}`;
+    if (change.error) {
+      item.textContent = `${change.change_id}: error — ${change.error}`;
+    } else {
+      const headline = document.createElement("div");
+      const idSpan = document.createElement("strong");
+      idSpan.textContent = change.change_id;
+      headline.appendChild(idSpan);
+      headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
+      item.appendChild(headline);
+      const dateSpan = document.createElement("span");
+      dateSpan.className = "change-date";
+      dateSpan.textContent = change.updated;
+      item.appendChild(dateSpan);
+      const desc = document.createElement("div");
+      desc.className = "change-desc";
+      desc.textContent = change.title;
+      item.appendChild(desc);
+      const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
+      if (roadmap) {
+        const roadmapSpan = document.createElement("div");
+        roadmapSpan.className = "change-roadmap";
+        roadmapSpan.textContent = roadmap.replace(/^ — /, "");
+        item.appendChild(roadmapSpan);
+      }
+    }
     list.appendChild(item);
   }
   details.appendChild(list);
@@ -229,11 +251,41 @@ async function syncProject(projectPath) {
     changesList.innerHTML = "";
     for (const change of project.changes) {
       const item = document.createElement("li");
-      item.textContent = change.error
-        ? `${change.change_id}: error — ${change.error}`
-        : `${change.title} [${change.status}] — updated ${change.updated}${formatPhaseProgress(change.phase_progress)}${formatRoadmapCorrelation(change.roadmap_correlation)}`;
+      if (change.error) {
+        item.textContent = `${change.change_id}: error — ${change.error}`;
+      } else {
+        const headline = document.createElement("div");
+        const idSpan = document.createElement("strong");
+        idSpan.textContent = change.change_id;
+        headline.appendChild(idSpan);
+        headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
+        item.appendChild(headline);
+        const dateSpan = document.createElement("span");
+        dateSpan.className = "change-date";
+        dateSpan.textContent = change.updated;
+        item.appendChild(dateSpan);
+        const desc = document.createElement("div");
+        desc.className = "change-desc";
+        desc.textContent = change.title;
+        item.appendChild(desc);
+        const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
+        if (roadmap) {
+          const roadmapSpan = document.createElement("div");
+          roadmapSpan.className = "change-roadmap";
+          roadmapSpan.textContent = roadmap.replace(/^ — /, "");
+          item.appendChild(roadmapSpan);
+        }
+      }
       changesList.appendChild(item);
     }
+
+    const latestDate = project.changes
+      .filter(c => !c.error && c.updated)
+      .map(c => c.updated)
+      .sort()
+      .at(-1) ?? "";
+    article.dataset.latestChange = latestDate;
+
     return { path: projectPath, success: true };
   } catch (error) {
     const errorDiv = document.getElementById(`sync-error-${projectPath}`);
@@ -265,35 +317,44 @@ async function syncAllProjects() {
   const syncAllBtn = document.getElementById("sync-all-btn");
   syncAllBtn.disabled = true;
 
-  for (const path of projectPaths) {
-    updateProjectUI(path);
-  }
+  try {
+    for (const path of projectPaths) {
+      updateProjectUI(path);
+    }
 
-  const statusEl = document.getElementById("sync-all-status");
-  statusEl.textContent = "";
+    const statusEl = document.getElementById("sync-all-status");
+    statusEl.textContent = "";
 
-  const promises = projectPaths.map(path => syncProject(path));
-  const results = await Promise.allSettled(promises);
+    const promises = projectPaths.map(path => syncProject(path));
+    const results = await Promise.allSettled(promises);
 
-  const successes = results.filter(r => r.status === "fulfilled" && r.value.success).length;
-  const failures = results.filter(r => r.status === "fulfilled" && !r.value.success).length;
-  const total = projectPaths.length;
+    const successes = results.filter(r => r.status === "fulfilled" && r.value.success).length;
+    const failures = results.filter(r => r.status === "fulfilled" && !r.value.success).length;
+    const total = projectPaths.length;
 
-  let statusMessage = `Synced ${successes}/${total} projects`;
-  if (failures > 0) {
-    const failedProjects = results
-      .filter(r => r.status === "fulfilled" && !r.value.success)
-      .map(r => `${r.value.path}: ${r.value.error}`)
-      .join(", ");
-    statusMessage += `. Failed: ${failedProjects}`;
-  }
+    let statusMessage = `Synced ${successes}/${total} projects`;
+    if (failures > 0) {
+      const failedProjects = results
+        .filter(r => r.status === "fulfilled" && !r.value.success)
+        .map(r => `${r.value.path}: ${r.value.error}`)
+        .join(", ");
+      statusMessage += `. Failed: ${failedProjects}`;
+    }
 
-  statusEl.textContent = statusMessage;
+    statusEl.textContent = statusMessage;
 
-  syncingAll = false;
-  syncAllBtn.disabled = false;
-  for (const path of projectPaths) {
-    updateProjectUI(path);
+    const container = document.getElementById("projects");
+    const articles = Array.from(container.querySelectorAll("article[data-project-path]"));
+    articles.sort((a, b) => (b.dataset.latestChange ?? "").localeCompare(a.dataset.latestChange ?? ""));
+    for (const art of articles) {
+      container.appendChild(art);
+    }
+  } finally {
+    syncingAll = false;
+    syncAllBtn.disabled = false;
+    for (const path of projectPaths) {
+      updateProjectUI(path);
+    }
   }
 }
 
@@ -333,10 +394,12 @@ function updateProjectUI(projectPath) {
   if (!section) return;
 
   const refreshBtn = section.querySelector(".refresh-btn");
+  const removeBtn = section.querySelector(".remove-btn");
   const loadingIndicator = section.querySelector(".loading-indicator");
 
   const isLoading = loadingProjects.has(projectPath);
   refreshBtn.disabled = isLoading || syncingAll;
+  removeBtn.disabled = isLoading || syncingAll;
   loadingIndicator.style.display = isLoading ? "inline-block" : "none";
 }
 
@@ -360,11 +423,21 @@ function scheduleAutosync(enabled, intervalMinutes) {
 }
 
 async function autosyncAll() {
-  const paths = Array.from(document.querySelectorAll("article[data-project-path]")).map(
-    (article) => article.getAttribute("data-project-path")
-  );
-  for (const path of paths) {
-    await syncProject(path);
+  if (syncingAll) return;
+
+  syncingAll = true;
+  try {
+    const paths = Array.from(document.querySelectorAll("article[data-project-path]")).map(
+      (article) => article.getAttribute("data-project-path")
+    );
+    for (const path of paths) {
+      await syncProject(path);
+    }
+  } finally {
+    syncingAll = false;
+    for (const article of document.querySelectorAll("article[data-project-path]")) {
+      updateProjectUI(article.getAttribute("data-project-path"));
+    }
   }
 }
 
