@@ -249,8 +249,8 @@ No stored-data migration is required. Existing tracked-project JSON and context 
 
 #### Manual
 
-- [x] 1.5 Inspect a fixture project with malformed `change.md` data and confirm valid records remain visible while the malformed record retains an explicit diagnostic
-- [x] 1.6 Inspect a project with multiple active changes and confirm the service returns candidates without selecting a command
+- [x] 1.5 Inspect a fixture project with malformed `change.md` data and confirm valid records remain visible while the malformed record retains an explicit diagnostic — 59b32a1
+- [x] 1.6 Inspect a project with multiple active changes and confirm the service returns candidates without selecting a command — 59b32a1
 
 ### Phase 2: Authenticated MCP Transport
 
