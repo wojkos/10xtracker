@@ -6,6 +6,9 @@ from pydantic import BaseModel
 class RoadmapCorrelation(BaseModel):
     roadmap_id: str
     outcome: str
+    prerequisites: list[str]
+    status: str
+    order: int
 
 
 def _extract_table_lines(text: str) -> list[str]:
@@ -38,12 +41,22 @@ def get_roadmap_correlations(context_dir: Path) -> dict[str, RoadmapCorrelation]
             return {}
 
         correlations: dict[str, RoadmapCorrelation] = {}
-        for line in table_lines[2:]:
+        for order, line in enumerate(table_lines[2:]):
             cells = [cell.strip() for cell in line.strip("|").split("|")]
-            if len(cells) < 3:
+            if len(cells) < 6:
                 continue
-            roadmap_id, change_id, outcome = cells[0], cells[1], cells[2]
-            correlations[change_id] = RoadmapCorrelation(roadmap_id=roadmap_id, outcome=outcome)
+            roadmap_id, change_id, outcome, prerequisites, _, status = cells[:6]
+            if not roadmap_id or not change_id or not outcome or not status:
+                continue
+            correlations[change_id] = RoadmapCorrelation(
+                roadmap_id=roadmap_id,
+                outcome=outcome,
+                prerequisites=[]
+                if prerequisites in {"-", "—"}
+                else [item.strip() for item in prerequisites.split(",") if item.strip()],
+                status=status,
+                order=order,
+            )
         return correlations
     except OSError:
         return {}

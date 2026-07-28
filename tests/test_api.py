@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app import projects, settings
 from app.main import app
+from app.project_status import get_project_status
 
 
 @pytest.fixture(autouse=True)
@@ -114,6 +115,17 @@ def test_post_valid_path_returns_parsed_changes(client: TestClient, tmp_path: Pa
     assert body["changes"][0]["status"] == "implementing"
 
 
+def test_post_project_response_matches_shared_project_status_service(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project(tmp_path)
+
+    response = client.post("/api/projects", json={"path": str(project)})
+
+    assert response.status_code == 200
+    assert response.json() == get_project_status(project.resolve()).model_dump(mode="json")
+
+
 def test_post_response_includes_phase_progress(client: TestClient, tmp_path: Path) -> None:
     project = _make_fixture_project_with_plan(tmp_path)
 
@@ -145,7 +157,13 @@ def test_post_response_includes_roadmap_correlation(client: TestClient, tmp_path
     assert response.status_code == 200
     body = response.json()
     roadmap_correlation = body["changes"][0]["roadmap_correlation"]
-    assert roadmap_correlation == {"roadmap_id": "S-04", "outcome": "do the thing"}
+    assert roadmap_correlation == {
+        "roadmap_id": "S-04",
+        "outcome": "do the thing",
+        "prerequisites": [],
+        "status": "done",
+        "order": 0,
+    }
 
 
 def test_get_response_includes_roadmap_correlation(client: TestClient, tmp_path: Path) -> None:
@@ -157,7 +175,13 @@ def test_get_response_includes_roadmap_correlation(client: TestClient, tmp_path:
     assert response.status_code == 200
     body = response.json()
     roadmap_correlation = body[0]["changes"][0]["roadmap_correlation"]
-    assert roadmap_correlation == {"roadmap_id": "S-04", "outcome": "do the thing"}
+    assert roadmap_correlation == {
+        "roadmap_id": "S-04",
+        "outcome": "do the thing",
+        "prerequisites": [],
+        "status": "done",
+        "order": 0,
+    }
 
 
 def test_post_path_without_context_changes_returns_400(

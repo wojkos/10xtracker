@@ -69,6 +69,9 @@ Not part of the table.
     assert len(result) == 9
     assert result["roadmap-correlation-view"].roadmap_id == "S-04"
     assert result["roadmap-correlation-view"].outcome == "see which roadmap items each change addresses"
+    assert result["roadmap-correlation-view"].prerequisites == ["S-01"]
+    assert result["roadmap-correlation-view"].status == "proposed"
+    assert result["roadmap-correlation-view"].order == 4
     assert result["configure-autosync-interval"].roadmap_id == "S-08"
     # keyed by change_id (index 1), not roadmap id (index 0)
     assert "S-04" not in result
@@ -91,6 +94,4 @@ def test_malformed_row_with_too_few_cells_is_skipped(tmp_path: Path) -> None:
 
     result = get_roadmap_correlations(context_dir)
 
-    assert len(result) == 1
-    assert result["some-change"].roadmap_id == "S-01"
-    assert result["some-change"].outcome == "do the thing"
+    assert result == {}
