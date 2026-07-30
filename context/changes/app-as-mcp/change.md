@@ -1,9 +1,9 @@
 ---
 change_id: app-as-mcp
 title: App as mcp
-status: implementing
+status: implemented
 created: 2026-07-27
-updated: 2026-07-28
+updated: 2026-07-30
 archived_at: null
 ---
 
