@@ -1,17 +1,32 @@
 import hmac
+import json
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
+from dotenv import dotenv_values
 from fastapi import FastAPI, HTTPException, Request
 from mcp.server.lowlevel import Server
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import TextContent, Tool
+from pydantic import TypeAdapter
+from starlette.responses import JSONResponse
+from starlette.routing import BaseRoute, Match
+from starlette.types import Receive, Scope, Send
 
 from app.project_status import get_project_statuses
 from app.recent_work import get_recent_work
 from app.workflow_recommendations import get_next_10x_action
+
+ENV_FILE = Path(__file__).parent.parent / ".env"
+
+
+def _get_mcp_token() -> str:
+    return os.environ.get("MCP_AUTH_TOKEN") or dotenv_values(ENV_FILE).get(
+        "MCP_AUTH_TOKEN", ""
+    )
 
 
 def _require_authentication(request: Request, expected_token: str) -> None:
@@ -24,7 +39,12 @@ def _require_authentication(request: Request, expected_token: str) -> None:
 
 
 def _to_text_content(data: Any) -> list[TextContent]:
-    return [TextContent(type="text", text=data.model_dump_json())]
+    return [
+        TextContent(
+            type="text",
+            text=TypeAdapter(Any).dump_json(data).decode("utf-8"),
+        )
+    ]
 
 
 def create_mcp_server() -> Server:
@@ -61,7 +81,12 @@ def create_mcp_server() -> Server:
         if name == "get_project_status":
             return _to_text_content(get_project_statuses())
         if name == "get_recent_work":
-            return _to_text_content(get_recent_work(arguments.get("limit", 10)))
+            return _to_text_content(
+                {
+                    "timestamp_interpretation": "record-update data",
+                    "items": get_recent_work(arguments.get("limit", 10)),
+                }
+            )
         if name == "get_next_10x_action":
             return _to_text_content(get_next_10x_action(arguments.get("project_path")))
         raise ValueError(f"Unknown tool: {name}")
@@ -69,8 +94,33 @@ def create_mcp_server() -> Server:
     return server
 
 
+class MCPRoute(BaseRoute):
+    def __init__(self, session_manager: StreamableHTTPSessionManager, token: str) -> None:
+        self.session_manager = session_manager
+        self.token = token
+
+    def matches(self, scope: Scope) -> tuple[Match, dict[str, Any]]:
+        if scope["type"] == "http" and scope["path"] == "/mcp":
+            return Match.FULL, {}
+        return Match.NONE, {}
+
+    def url_path_for(self, name: str, /, **path_params: Any) -> Any:
+        raise RuntimeError("The MCP route has no named URL")
+
+    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
+        request = Request(scope, receive)
+        try:
+            _require_authentication(request, self.token)
+        except HTTPException:
+            await JSONResponse({"detail": "Unauthorized"}, status_code=401)(
+                scope, receive, send
+            )
+            return
+        await self.session_manager.handle_request(scope, receive, send)
+
+
 def add_mcp_transport(app: FastAPI) -> None:
-    token = os.environ.get("MCP_AUTH_TOKEN", "")
+    token = _get_mcp_token()
     if not token:
         raise RuntimeError("MCP_AUTH_TOKEN must be set before starting the application")
 
@@ -87,7 +137,4 @@ def add_mcp_transport(app: FastAPI) -> None:
 
     app.router.lifespan_context = lifespan
 
-    @app.post("/mcp")
-    async def handle_mcp(request: Request) -> None:
-        _require_authentication(request, token)
-        await session_manager.handle_request(request.scope, request.receive, request._send)
+    app.router.routes.append(MCPRoute(session_manager, token))

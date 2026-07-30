@@ -1,11 +1,11 @@
-import os
+import json
 from pathlib import Path
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app import projects
+from app import mcp, projects
 from app.mcp import add_mcp_transport
 
 
@@ -32,8 +32,21 @@ def _headers() -> dict[str, str]:
 
 def test_missing_mcp_token_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("MCP_AUTH_TOKEN", raising=False)
+    monkeypatch.setattr(mcp, "ENV_FILE", Path("missing.env"))
     with pytest.raises(RuntimeError, match="MCP_AUTH_TOKEN"):
         add_mcp_transport(FastAPI())
+
+
+def test_mcp_token_loads_from_root_dotenv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    dotenv_file = tmp_path / ".env"
+    dotenv_file.write_text("MCP_AUTH_TOKEN=dotenv-token\n", encoding="utf-8")
+    monkeypatch.delenv("MCP_AUTH_TOKEN", raising=False)
+    monkeypatch.setattr(mcp, "ENV_FILE", dotenv_file)
+
+    app = FastAPI()
+    add_mcp_transport(app)
+
+    assert app.router.routes[-1].token == "dotenv-token"
 
 
 @pytest.mark.parametrize("authorization", [None, "Basic test-token", "Bearer wrong-token"])
@@ -77,4 +90,8 @@ def test_mcp_lists_and_calls_read_only_tools(client: TestClient) -> None:
                 headers=_headers(),
             )
             assert response.status_code == 200
-            assert response.json()["result"]["content"][0]["type"] == "text"
+            content = response.json()["result"]["content"][0]
+            assert content["type"] == "text"
+            tool_result = json.loads(content["text"])
+            if tool_name == "get_recent_work":
+                assert tool_result["timestamp_interpretation"] == "record-update data"

@@ -256,15 +256,15 @@ No stored-data migration is required. Existing tracked-project JSON and context 
 
 #### Automated
 
-- [ ] 2.1 Dependency resolution and application import succeed
-- [ ] 2.2 MCP tests reject missing, malformed, and invalid Bearer tokens before tool dispatch
-- [ ] 2.3 MCP protocol tests exercise initialization, `tools/list`, and each `tools/call` contract with a configured token
-- [ ] 2.4 The full test suite passes
+- [x] 2.1 Dependency resolution and application import succeed
+- [x] 2.2 MCP tests reject missing, malformed, and invalid Bearer tokens before tool dispatch
+- [x] 2.3 MCP protocol tests exercise initialization, `tools/list`, and each `tools/call` contract with a configured token
+- [x] 2.4 The full test suite passes
 
 #### Manual
 
-- [ ] 2.5 Start the server with a generated token on `127.0.0.1` and confirm an unauthenticated HTTP request to `/mcp` returns 401 without protocol output
-- [ ] 2.6 Use VS Code / GitHub Copilot's configured MCP client to discover all three tools and invoke them against a tracked fixture or local project
+- [x] 2.5 Start the server with a generated token on `127.0.0.1` and confirm an unauthenticated HTTP request to `/mcp` returns 401 without protocol output
+- [x] 2.6 Use VS Code / GitHub Copilot's configured MCP client to discover all three tools and invoke them against a tracked fixture or local project
 
 ### Phase 3: VS Code Setup and Operational Documentation
 
