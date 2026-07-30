@@ -270,10 +270,10 @@ No stored-data migration is required. Existing tracked-project JSON and context 
 
 #### Automated
 
-- [ ] 3.1 README commands use the repository-standard `python -m uv` invocation
-- [ ] 3.2 The full test suite still passes after documentation and final integration work
+- [x] 3.1 README commands use the repository-standard `python -m uv` invocation
+- [x] 3.2 The full test suite still passes after documentation and final integration work
 
 #### Manual
 
-- [ ] 3.3 Follow the README in a fresh PowerShell session to generate a token, launch the loopback-bound app, and configure VS Code / GitHub Copilot without placing the secret in version control
-- [ ] 3.4 Discover and call each documented tool in VS Code / GitHub Copilot, then rotate the token and confirm that restarting the server is required before the new token works
+- [x] 3.3 Follow the README in a fresh PowerShell session to generate a token, launch the loopback-bound app, and configure VS Code / GitHub Copilot without placing the secret in version control
+- [x] 3.4 Discover and call each documented tool in VS Code / GitHub Copilot, then rotate the token and confirm that restarting the server is required before the new token works
