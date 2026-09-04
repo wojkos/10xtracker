@@ -250,8 +250,8 @@ None. This is additive API + UI behavior with no persisted schema changes.
 
 #### Automated
 
-- [x] 2.1 `python -m uv run python -c "import app.main"` succeeds
-- [x] 2.2 `python -m uv run pytest tests/test_api.py -v` remains green after frontend changes
+- [x] 2.1 `python -m uv run python -c "import app.main"` succeeds — 94548a2
+- [x] 2.2 `python -m uv run pytest tests/test_api.py -v` remains green after frontend changes — 94548a2
 
 #### Manual
 
@@ -264,8 +264,8 @@ None. This is additive API + UI behavior with no persisted schema changes.
 
 #### Automated
 
-- [ ] 3.1 `python -m uv run pytest tests/test_api.py -v` passes
-- [ ] 3.2 `python -m uv run python -c "import app.main"` succeeds
+- [x] 3.1 `python -m uv run pytest tests/test_api.py -v` passes
+- [x] 3.2 `python -m uv run python -c "import app.main"` succeeds
 
 #### Manual
 

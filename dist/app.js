@@ -137,9 +137,10 @@ function renderProjectSection(project) {
   refreshBtn.className = "refresh-btn";
   refreshBtn.textContent = "Refresh";
   refreshBtn.disabled = loadingProjects.has(project.path);
-  refreshBtn.addEventListener("click", (e) => {
+  refreshBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    syncProject(project.path);
+    await syncProject(project.path);
+    loadRecommendations();
   });
   controls.appendChild(refreshBtn);
 
@@ -315,6 +316,8 @@ async function syncAllProjects() {
     for (const art of articles) {
       container.appendChild(art);
     }
+
+    loadRecommendations();
   } finally {
     syncingAll = false;
     syncAllBtn.disabled = false;
@@ -348,6 +351,7 @@ async function removeProject(projectPath) {
 
     await loadProjects();
     applyExpandedState();
+    loadRecommendations();
   } catch (error) {
     if (errorDiv) {
       errorDiv.textContent = `Error: ${error.message}`;
@@ -468,6 +472,8 @@ async function autosyncAll() {
     for (const path of paths) {
       await syncProject(path);
     }
+
+    loadRecommendations();
   } finally {
     syncingAll = false;
     for (const article of document.querySelectorAll("article[data-project-path]")) {
@@ -532,6 +538,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     projectsContainer.innerHTML =
       '<p style="color: red;">Failed to load projects. Please refresh the page.</p>';
   }
+  loadRecommendations();
 
   const syncAllBtn = document.getElementById("sync-all-btn");
   syncAllBtn.addEventListener("click", syncAllProjects);
@@ -560,6 +567,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       input.value = "";
       await loadProjects();
       applyExpandedState();
+      loadRecommendations();
     } catch (error) {
       errorEl.textContent = `Error: ${error.message}`;
     }
