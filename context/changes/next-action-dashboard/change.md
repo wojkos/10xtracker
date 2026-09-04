@@ -1,7 +1,7 @@
 ---
 change_id: next-action-dashboard
 title: Show next recommended action prominently in the dashboard
-status: implemented
+status: impl_reviewed
 created: 2026-07-30
 updated: 2026-09-04
 archived_at: null
