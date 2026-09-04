@@ -264,8 +264,8 @@ None. This is additive API + UI behavior with no persisted schema changes.
 
 #### Automated
 
-- [x] 3.1 `python -m uv run pytest tests/test_api.py -v` passes
-- [x] 3.2 `python -m uv run python -c "import app.main"` succeeds
+- [x] 3.1 `python -m uv run pytest tests/test_api.py -v` passes — f12fad0
+- [x] 3.2 `python -m uv run python -c "import app.main"` succeeds — f12fad0
 
 #### Manual
 
