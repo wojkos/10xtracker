@@ -369,6 +369,75 @@ function updateProjectUI(projectPath) {
   loadingIndicator.style.display = isLoading ? "inline-block" : "none";
 }
 
+function renderRecommendation(recommendation) {
+  const item = document.createElement("div");
+  item.className = "recommendation";
+
+  const path = document.createElement("p");
+  path.className = "recommendation-path";
+  path.textContent = recommendation.project_path;
+  item.appendChild(path);
+
+  const badge = document.createElement("span");
+  badge.className = `confidence-badge confidence-${recommendation.confidence}`;
+  badge.textContent = recommendation.confidence;
+  item.appendChild(badge);
+
+  const reason = document.createElement("p");
+  reason.className = "recommendation-reason";
+  reason.textContent = recommendation.reason;
+  item.appendChild(reason);
+
+  if (recommendation.command) {
+    const command = document.createElement("code");
+    command.className = "recommendation-command";
+    command.textContent = recommendation.command;
+    item.appendChild(command);
+  }
+
+  if (recommendation.blocking_question) {
+    const question = document.createElement("p");
+    question.className = "recommendation-blocking-question";
+    question.textContent = recommendation.blocking_question;
+    item.appendChild(question);
+  }
+
+  if (recommendation.candidates.length > 0) {
+    const candidates = document.createElement("ul");
+    candidates.className = "recommendation-candidates";
+    for (const candidate of recommendation.candidates) {
+      const candidateItem = document.createElement("li");
+      candidateItem.textContent = candidate;
+      candidates.appendChild(candidateItem);
+    }
+    item.appendChild(candidates);
+  }
+
+  return item;
+}
+
+async function loadRecommendations() {
+  const container = document.getElementById("next-action-content");
+  try {
+    const response = await fetch("/api/recommendations");
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const recommendations = await response.json();
+
+    container.innerHTML = "";
+    for (const recommendation of recommendations) {
+      container.appendChild(renderRecommendation(recommendation));
+    }
+  } catch (error) {
+    container.innerHTML = "";
+    const errorEl = document.createElement("p");
+    errorEl.className = "recommendation-error";
+    errorEl.textContent = `Failed to load recommendations: ${error.message}`;
+    container.appendChild(errorEl);
+  }
+}
+
 async function loadProjects() {
   const response = await fetch("/api/projects");
   if (!response.ok) {

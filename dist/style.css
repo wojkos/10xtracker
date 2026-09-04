@@ -158,6 +158,84 @@ body {
   font-size: 0.9em;
 }
 
+#next-action {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+#next-action h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+}
+
+.recommendation {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recommendation:last-child {
+  border-bottom: none;
+}
+
+.recommendation-path {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+.confidence-badge {
+  display: inline-block;
+  margin-top: 0.25em;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.confidence-high {
+  background-color: #e3f1e6;
+  color: #256a38;
+}
+
+.confidence-low {
+  background-color: #fbe9e5;
+  color: var(--text-error);
+}
+
+.recommendation-reason {
+  margin: 0.4em 0 0 0;
+}
+
+.recommendation-command {
+  display: block;
+  margin-top: 0.4em;
+  padding: 0.4em 0.6em;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.recommendation-blocking-question {
+  margin: 0.4em 0 0 0;
+  font-weight: 600;
+}
+
+.recommendation-candidates {
+  margin: 0.3em 0 0 1.2em;
+  padding: 0;
+  font-size: 0.9em;
+}
+
+.recommendation-error {
+  color: var(--text-error);
+}
+
 article {
   margin-bottom: 1em;
   border: 1px solid var(--border);
