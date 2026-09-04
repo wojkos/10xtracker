@@ -10,11 +10,7 @@ from app.settings import load_autosync_settings, save_autosync_settings
 router = APIRouter()
 
 
-class AddProjectRequest(BaseModel):
-    path: str
-
-
-class RemoveProjectRequest(BaseModel):
+class ProjectPathRequest(BaseModel):
     path: str
 
 
@@ -29,7 +25,7 @@ class UpdateSettingsRequest(BaseModel):
 
 
 @router.post("/projects", response_model=ProjectResponse)
-def add_project(request: AddProjectRequest) -> ProjectResponse:
+def add_project(request: ProjectPathRequest) -> ProjectResponse:
     try:
         added_path = add_tracked_project(Path(request.path))
     except ValueError as exc:
@@ -43,7 +39,7 @@ def list_projects() -> list[ProjectResponse]:
 
 
 @router.delete("/projects")
-def remove_project(request: RemoveProjectRequest) -> dict[str, bool]:
+def remove_project(request: ProjectPathRequest) -> dict[str, bool]:
     try:
         remove_tracked_project(Path(request.path))
     except ValueError as exc:

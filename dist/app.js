@@ -52,23 +52,7 @@ function getAggregates(changes) {
   return aggregates;
 }
 
-function renderProjectSection(project) {
-  const article = document.createElement("article");
-  article.setAttribute("data-project-path", project.path);
-  article.id = `project-${project.path}`;
-
-  const header = document.createElement("header");
-
-  const heading = document.createElement("h2");
-  heading.textContent = project.name;
-  header.appendChild(heading);
-
-  const projectPath = document.createElement("p");
-  projectPath.className = "summary-stats project-path";
-  projectPath.textContent = project.path;
-  header.appendChild(projectPath);
-
-  const aggregates = project.aggregates || { new: 0, in_progress: 0, done: 0, blocked: 0 };
+function renderSummaryStats(aggregates) {
   const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
 
   const summaryStats = document.createElement("p");
@@ -89,7 +73,62 @@ function renderProjectSection(project) {
     summaryStats.appendChild(emptyNote);
   }
 
-  header.appendChild(summaryStats);
+  return summaryStats;
+}
+
+function renderChangeItem(change) {
+  const item = document.createElement("li");
+  if (change.error) {
+    item.textContent = `${change.change_id}: error — ${change.error}`;
+    return item;
+  }
+
+  const headline = document.createElement("div");
+  const idSpan = document.createElement("strong");
+  idSpan.textContent = change.change_id;
+  headline.appendChild(idSpan);
+  headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
+  item.appendChild(headline);
+
+  const dateSpan = document.createElement("span");
+  dateSpan.className = "change-date";
+  dateSpan.textContent = change.updated;
+  item.appendChild(dateSpan);
+
+  const desc = document.createElement("div");
+  desc.className = "change-desc";
+  desc.textContent = change.title;
+  item.appendChild(desc);
+
+  const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
+  if (roadmap) {
+    const roadmapSpan = document.createElement("div");
+    roadmapSpan.className = "change-roadmap";
+    roadmapSpan.textContent = roadmap.replace(/^ — /, "");
+    item.appendChild(roadmapSpan);
+  }
+
+  return item;
+}
+
+function renderProjectSection(project) {
+  const article = document.createElement("article");
+  article.setAttribute("data-project-path", project.path);
+  article.id = `project-${project.path}`;
+
+  const header = document.createElement("header");
+
+  const heading = document.createElement("h2");
+  heading.textContent = project.name;
+  header.appendChild(heading);
+
+  const projectPath = document.createElement("p");
+  projectPath.className = "summary-stats project-path";
+  projectPath.textContent = project.path;
+  header.appendChild(projectPath);
+
+  const aggregates = project.aggregates || { new: 0, in_progress: 0, done: 0, blocked: 0 };
+  header.appendChild(renderSummaryStats(aggregates));
 
   const controls = document.createElement("div");
   controls.className = "project-controls";
@@ -128,33 +167,7 @@ function renderProjectSection(project) {
 
   const list = document.createElement("ul");
   for (const change of project.changes) {
-    const item = document.createElement("li");
-    if (change.error) {
-      item.textContent = `${change.change_id}: error — ${change.error}`;
-    } else {
-      const headline = document.createElement("div");
-      const idSpan = document.createElement("strong");
-      idSpan.textContent = change.change_id;
-      headline.appendChild(idSpan);
-      headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
-      item.appendChild(headline);
-      const dateSpan = document.createElement("span");
-      dateSpan.className = "change-date";
-      dateSpan.textContent = change.updated;
-      item.appendChild(dateSpan);
-      const desc = document.createElement("div");
-      desc.className = "change-desc";
-      desc.textContent = change.title;
-      item.appendChild(desc);
-      const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
-      if (roadmap) {
-        const roadmapSpan = document.createElement("div");
-        roadmapSpan.className = "change-roadmap";
-        roadmapSpan.textContent = roadmap.replace(/^ — /, "");
-        item.appendChild(roadmapSpan);
-      }
-    }
-    list.appendChild(item);
+    list.appendChild(renderChangeItem(change));
   }
   details.appendChild(list);
 
@@ -221,28 +234,7 @@ async function syncProject(projectPath) {
 
     const header = article.querySelector("header");
     const oldStats = header.querySelector(".aggregate-stats");
-    const aggregates = project.aggregates;
-    const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
-
-    const newStats = document.createElement("p");
-    newStats.className = "summary-stats aggregate-stats";
-    newStats.textContent = countStr;
-
-    if (aggregates.blocked > 0) {
-      const blockedNote = document.createElement("span");
-      blockedNote.className = "blocked-note";
-      blockedNote.textContent = ` (${aggregates.blocked} Blocked)`;
-      newStats.appendChild(blockedNote);
-    }
-
-    const total = aggregates.new + aggregates.in_progress + aggregates.done + aggregates.blocked;
-    if (total === 0) {
-      const emptyNote = document.createElement("span");
-      emptyNote.textContent = " (no readable changes)";
-      newStats.appendChild(emptyNote);
-    }
-
-    oldStats.replaceWith(newStats);
+    oldStats.replaceWith(renderSummaryStats(project.aggregates));
 
     const changesList = article.querySelector(".details ul");
     if (!changesList) {
@@ -250,33 +242,7 @@ async function syncProject(projectPath) {
     }
     changesList.innerHTML = "";
     for (const change of project.changes) {
-      const item = document.createElement("li");
-      if (change.error) {
-        item.textContent = `${change.change_id}: error — ${change.error}`;
-      } else {
-        const headline = document.createElement("div");
-        const idSpan = document.createElement("strong");
-        idSpan.textContent = change.change_id;
-        headline.appendChild(idSpan);
-        headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
-        item.appendChild(headline);
-        const dateSpan = document.createElement("span");
-        dateSpan.className = "change-date";
-        dateSpan.textContent = change.updated;
-        item.appendChild(dateSpan);
-        const desc = document.createElement("div");
-        desc.className = "change-desc";
-        desc.textContent = change.title;
-        item.appendChild(desc);
-        const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
-        if (roadmap) {
-          const roadmapSpan = document.createElement("div");
-          roadmapSpan.className = "change-roadmap";
-          roadmapSpan.textContent = roadmap.replace(/^ — /, "");
-          item.appendChild(roadmapSpan);
-        }
-      }
-      changesList.appendChild(item);
+      changesList.appendChild(renderChangeItem(change));
     }
 
     const latestDate = project.changes

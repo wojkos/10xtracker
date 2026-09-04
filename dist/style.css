@@ -72,16 +72,6 @@ body {
   background-color: #eadbcb;
 }
 
-#dashboard-controls {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 0.75rem 0;
-  font-size: 0.9rem;
-}
-
 #autosync-controls {
   display: flex;
   align-items: center;
@@ -92,33 +82,6 @@ body {
 #autosync-error {
   color: var(--text-error);
   font-size: 0.9rem;
-}
-
-#sync-all-btn {
-  padding: 0.5em 1em;
-  background-color: var(--accent);
-  color: var(--surface);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-#sync-all-btn:disabled {
-  background-color: var(--border);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-}
-
-#sync-all-btn:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-}
-
-#sync-all-status {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
 }
 
 #dashboard-controls #autosync-controls {
