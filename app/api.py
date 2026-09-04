@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.projects import add_tracked_project, load_tracked_projects, remove_tracked_project
 from app.project_status import ProjectResponse, get_project_status, get_project_statuses
 from app.settings import load_autosync_settings, save_autosync_settings
+from app.workflow_recommendations import WorkflowRecommendation, get_next_10x_action
 
 router = APIRouter()
 
@@ -45,6 +46,11 @@ def remove_project(request: ProjectPathRequest) -> dict[str, bool]:
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
     return {"removed": True}
+
+
+@router.get("/recommendations", response_model=list[WorkflowRecommendation])
+def get_recommendations() -> list[WorkflowRecommendation]:
+    return get_next_10x_action()
 
 
 @router.get("/settings", response_model=SettingsResponse)
