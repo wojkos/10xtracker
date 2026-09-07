@@ -461,9 +461,9 @@ models are unaffected.
 
 #### Automated
 
-- [ ] 4.1 New end-to-end test passes (real git repo + git worktree add, single active change, one branch-labeled entry)
-- [ ] 4.2 Full suite passes: uv run pytest
+- [x] 4.1 New end-to-end test passes (real git repo + git worktree add, single active change, one branch-labeled entry)
+- [x] 4.2 Full suite passes: uv run pytest
 
 #### Manual
 
-- [ ] 4.3 Final confirmation the change is complete
+- [x] 4.3 Final confirmation the change is complete

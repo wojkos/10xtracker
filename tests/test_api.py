@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -102,6 +103,39 @@ archived_at: null
         encoding="utf-8",
     )
     return project
+
+
+def _run_git(*args: str, cwd: Path) -> None:
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True)
+
+
+def _make_fixture_project_with_worktree(tmp_path: Path) -> tuple[Path, str]:
+    project = _make_fixture_project_with_plan(tmp_path)
+    _run_git("init", cwd=project)
+    _run_git("config", "user.email", "test@example.com", cwd=project)
+    _run_git("config", "user.name", "Test", cwd=project)
+    _run_git("add", "-A", cwd=project)
+    _run_git("commit", "-m", "initial commit", cwd=project)
+
+    worktree_path = tmp_path / "linked-worktree"
+    _run_git("worktree", "add", str(worktree_path), "-b", "feature-branch", cwd=project)
+
+    return project, "feature-branch"
+
+
+def test_get_recommendations_with_real_git_worktree_returns_branch_labeled_entry(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project, branch = _make_fixture_project_with_worktree(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.get("/api/recommendations")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["branch"] == branch
+    assert body[0]["command"] == "/10x-implement some-change phase 1"
 
 
 def test_post_valid_path_returns_parsed_changes(client: TestClient, tmp_path: Path) -> None:
