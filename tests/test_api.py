@@ -205,6 +205,38 @@ def test_post_duplicate_path_returns_400(client: TestClient, tmp_path: Path) -> 
     assert response.status_code == 400
 
 
+def _make_fixture_project_with_update_date(tmp_path: Path, name: str, updated: str) -> Path:
+    project = tmp_path / name
+    change_folder = project / "context" / "changes" / "some-change"
+    change_folder.mkdir(parents=True)
+    (change_folder / "change.md").write_text(
+        f"""---
+change_id: some-change
+title: Some Change
+status: implementing
+created: {updated}
+updated: {updated}
+archived_at: null
+---
+""",
+        encoding="utf-8",
+    )
+    return project
+
+
+def test_get_orders_projects_by_most_recently_updated_change(
+    client: TestClient, tmp_path: Path
+) -> None:
+    older = _make_fixture_project_with_update_date(tmp_path, "older-project", "2026-01-01")
+    newer = _make_fixture_project_with_update_date(tmp_path, "newer-project", "2026-06-15")
+    client.post("/api/projects", json={"path": str(older)})
+    client.post("/api/projects", json={"path": str(newer)})
+
+    response = client.get("/api/projects")
+
+    assert [p["name"] for p in response.json()] == ["newer-project", "older-project"]
+
+
 def test_get_after_post_returns_project_in_list(client: TestClient, tmp_path: Path) -> None:
     project = _make_fixture_project(tmp_path)
     client.post("/api/projects", json={"path": str(project)})
@@ -269,3 +301,82 @@ def test_put_settings_with_out_of_range_interval_returns_400(client: TestClient)
 
     assert response.status_code == 400
     assert "detail" in response.json()
+
+
+def test_get_recommendations_returns_high_confidence_entry(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project_with_plan(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.get("/api/recommendations")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["confidence"] == "high"
+    assert body[0]["command"] == "/10x-implement some-change phase 1"
+    assert body[0]["reason"]
+
+
+def test_put_active_false_excludes_from_list_and_appears_in_inactive(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.put(
+        "/api/projects/active", json={"path": str(project.resolve()), "active": False}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"active": False}
+    assert client.get("/api/projects").json() == []
+    inactive = client.get("/api/projects/inactive").json()
+    assert len(inactive) == 1
+    assert inactive[0]["name"] == "fixture-project"
+
+
+def test_put_active_true_restores_to_list_and_removes_from_inactive(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+    client.put("/api/projects/active", json={"path": str(project.resolve()), "active": False})
+
+    response = client.put(
+        "/api/projects/active", json={"path": str(project.resolve()), "active": True}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"active": True}
+    assert len(client.get("/api/projects").json()) == 1
+    assert client.get("/api/projects/inactive").json() == []
+
+
+def test_put_active_on_untracked_path_returns_404(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project(tmp_path)
+
+    response = client.put(
+        "/api/projects/active", json={"path": str(project), "active": False}
+    )
+
+    assert response.status_code == 404
+    assert "detail" in response.json()
+
+
+def test_get_recommendations_returns_low_confidence_entry(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.get("/api/recommendations")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["confidence"] == "low"
+    assert body[0]["command"] is None
+    assert body[0]["blocking_question"]
+    assert body[0]["candidates"] == ["some-change"]

@@ -52,23 +52,7 @@ function getAggregates(changes) {
   return aggregates;
 }
 
-function renderProjectSection(project) {
-  const article = document.createElement("article");
-  article.setAttribute("data-project-path", project.path);
-  article.id = `project-${project.path}`;
-
-  const header = document.createElement("header");
-
-  const heading = document.createElement("h2");
-  heading.textContent = project.name;
-  header.appendChild(heading);
-
-  const projectPath = document.createElement("p");
-  projectPath.className = "summary-stats project-path";
-  projectPath.textContent = project.path;
-  header.appendChild(projectPath);
-
-  const aggregates = project.aggregates || { new: 0, in_progress: 0, done: 0, blocked: 0 };
+function renderSummaryStats(aggregates) {
   const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
 
   const summaryStats = document.createElement("p");
@@ -89,7 +73,62 @@ function renderProjectSection(project) {
     summaryStats.appendChild(emptyNote);
   }
 
-  header.appendChild(summaryStats);
+  return summaryStats;
+}
+
+function renderChangeItem(change) {
+  const item = document.createElement("li");
+  if (change.error) {
+    item.textContent = `${change.change_id}: error — ${change.error}`;
+    return item;
+  }
+
+  const headline = document.createElement("div");
+  const idSpan = document.createElement("strong");
+  idSpan.textContent = change.change_id;
+  headline.appendChild(idSpan);
+  headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
+  item.appendChild(headline);
+
+  const dateSpan = document.createElement("span");
+  dateSpan.className = "change-date";
+  dateSpan.textContent = change.updated;
+  item.appendChild(dateSpan);
+
+  const desc = document.createElement("div");
+  desc.className = "change-desc";
+  desc.textContent = change.title;
+  item.appendChild(desc);
+
+  const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
+  if (roadmap) {
+    const roadmapSpan = document.createElement("div");
+    roadmapSpan.className = "change-roadmap";
+    roadmapSpan.textContent = roadmap.replace(/^ — /, "");
+    item.appendChild(roadmapSpan);
+  }
+
+  return item;
+}
+
+function renderProjectSection(project) {
+  const article = document.createElement("article");
+  article.setAttribute("data-project-path", project.path);
+  article.id = `project-${project.path}`;
+
+  const header = document.createElement("header");
+
+  const heading = document.createElement("h2");
+  heading.textContent = project.name;
+  header.appendChild(heading);
+
+  const projectPath = document.createElement("p");
+  projectPath.className = "summary-stats project-path";
+  projectPath.textContent = project.path;
+  header.appendChild(projectPath);
+
+  const aggregates = project.aggregates || { new: 0, in_progress: 0, done: 0, blocked: 0 };
+  header.appendChild(renderSummaryStats(aggregates));
 
   const controls = document.createElement("div");
   controls.className = "project-controls";
@@ -98,9 +137,10 @@ function renderProjectSection(project) {
   refreshBtn.className = "refresh-btn";
   refreshBtn.textContent = "Refresh";
   refreshBtn.disabled = loadingProjects.has(project.path);
-  refreshBtn.addEventListener("click", (e) => {
+  refreshBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    syncProject(project.path);
+    await syncProject(project.path);
+    loadRecommendations();
   });
   controls.appendChild(refreshBtn);
 
@@ -119,6 +159,15 @@ function renderProjectSection(project) {
   });
   controls.appendChild(removeBtn);
 
+  const archiveBtn = document.createElement("button");
+  archiveBtn.className = "archive-btn";
+  archiveBtn.textContent = "Archive";
+  archiveBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    archiveProject(project.path);
+  });
+  controls.appendChild(archiveBtn);
+
   header.appendChild(controls);
   article.appendChild(header);
 
@@ -128,33 +177,7 @@ function renderProjectSection(project) {
 
   const list = document.createElement("ul");
   for (const change of project.changes) {
-    const item = document.createElement("li");
-    if (change.error) {
-      item.textContent = `${change.change_id}: error — ${change.error}`;
-    } else {
-      const headline = document.createElement("div");
-      const idSpan = document.createElement("strong");
-      idSpan.textContent = change.change_id;
-      headline.appendChild(idSpan);
-      headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
-      item.appendChild(headline);
-      const dateSpan = document.createElement("span");
-      dateSpan.className = "change-date";
-      dateSpan.textContent = change.updated;
-      item.appendChild(dateSpan);
-      const desc = document.createElement("div");
-      desc.className = "change-desc";
-      desc.textContent = change.title;
-      item.appendChild(desc);
-      const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
-      if (roadmap) {
-        const roadmapSpan = document.createElement("div");
-        roadmapSpan.className = "change-roadmap";
-        roadmapSpan.textContent = roadmap.replace(/^ — /, "");
-        item.appendChild(roadmapSpan);
-      }
-    }
-    list.appendChild(item);
+    list.appendChild(renderChangeItem(change));
   }
   details.appendChild(list);
 
@@ -221,28 +244,7 @@ async function syncProject(projectPath) {
 
     const header = article.querySelector("header");
     const oldStats = header.querySelector(".aggregate-stats");
-    const aggregates = project.aggregates;
-    const countStr = `${aggregates.new} New, ${aggregates.in_progress} In Progress, ${aggregates.done} Done`;
-
-    const newStats = document.createElement("p");
-    newStats.className = "summary-stats aggregate-stats";
-    newStats.textContent = countStr;
-
-    if (aggregates.blocked > 0) {
-      const blockedNote = document.createElement("span");
-      blockedNote.className = "blocked-note";
-      blockedNote.textContent = ` (${aggregates.blocked} Blocked)`;
-      newStats.appendChild(blockedNote);
-    }
-
-    const total = aggregates.new + aggregates.in_progress + aggregates.done + aggregates.blocked;
-    if (total === 0) {
-      const emptyNote = document.createElement("span");
-      emptyNote.textContent = " (no readable changes)";
-      newStats.appendChild(emptyNote);
-    }
-
-    oldStats.replaceWith(newStats);
+    oldStats.replaceWith(renderSummaryStats(project.aggregates));
 
     const changesList = article.querySelector(".details ul");
     if (!changesList) {
@@ -250,33 +252,7 @@ async function syncProject(projectPath) {
     }
     changesList.innerHTML = "";
     for (const change of project.changes) {
-      const item = document.createElement("li");
-      if (change.error) {
-        item.textContent = `${change.change_id}: error — ${change.error}`;
-      } else {
-        const headline = document.createElement("div");
-        const idSpan = document.createElement("strong");
-        idSpan.textContent = change.change_id;
-        headline.appendChild(idSpan);
-        headline.appendChild(document.createTextNode(` [${change.status}]${formatPhaseProgress(change.phase_progress)}`));
-        item.appendChild(headline);
-        const dateSpan = document.createElement("span");
-        dateSpan.className = "change-date";
-        dateSpan.textContent = change.updated;
-        item.appendChild(dateSpan);
-        const desc = document.createElement("div");
-        desc.className = "change-desc";
-        desc.textContent = change.title;
-        item.appendChild(desc);
-        const roadmap = formatRoadmapCorrelation(change.roadmap_correlation);
-        if (roadmap) {
-          const roadmapSpan = document.createElement("div");
-          roadmapSpan.className = "change-roadmap";
-          roadmapSpan.textContent = roadmap.replace(/^ — /, "");
-          item.appendChild(roadmapSpan);
-        }
-      }
-      changesList.appendChild(item);
+      changesList.appendChild(renderChangeItem(change));
     }
 
     const latestDate = project.changes
@@ -349,6 +325,8 @@ async function syncAllProjects() {
     for (const art of articles) {
       container.appendChild(art);
     }
+
+    loadRecommendations();
   } finally {
     syncingAll = false;
     syncAllBtn.disabled = false;
@@ -382,11 +360,134 @@ async function removeProject(projectPath) {
 
     await loadProjects();
     applyExpandedState();
+    loadRecommendations();
   } catch (error) {
     if (errorDiv) {
       errorDiv.textContent = `Error: ${error.message}`;
     }
   }
+}
+
+async function archiveProject(projectPath) {
+  if (!window.confirm(`Archive "${projectPath}"? It will stop being scanned until you unarchive it.`)) {
+    return;
+  }
+
+  const errorDiv = document.getElementById(`sync-error-${projectPath}`);
+
+  try {
+    const response = await fetch("/api/projects/active", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: projectPath, active: false }),
+    });
+    const body = await response.json();
+
+    if (!response.ok) {
+      if (errorDiv) {
+        errorDiv.textContent = body.detail || "Failed to archive project.";
+      }
+      return;
+    }
+
+    await loadProjects();
+    applyExpandedState();
+    await loadArchivedProjects();
+    loadRecommendations();
+  } catch (error) {
+    if (errorDiv) {
+      errorDiv.textContent = `Error: ${error.message}`;
+    }
+  }
+}
+
+async function unarchiveProject(projectPath) {
+  const errorEl = document.getElementById("archived-projects-error");
+
+  try {
+    const response = await fetch("/api/projects/active", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: projectPath, active: true }),
+    });
+    const body = await response.json();
+
+    if (!response.ok) {
+      if (errorEl) {
+        errorEl.textContent = body.detail || "Failed to unarchive project.";
+      }
+      return;
+    }
+
+    await loadProjects();
+    applyExpandedState();
+    await loadArchivedProjects();
+    loadRecommendations();
+  } catch (error) {
+    if (errorEl) {
+      errorEl.textContent = `Error: ${error.message}`;
+    }
+  }
+}
+
+function renderArchivedProjectRow(project) {
+  const row = document.createElement("div");
+  row.className = "archived-project-row";
+
+  const info = document.createElement("div");
+  info.className = "archived-project-info";
+
+  const name = document.createElement("strong");
+  name.textContent = project.name;
+  info.appendChild(name);
+
+  const path = document.createElement("span");
+  path.className = "archived-project-path";
+  path.textContent = project.path;
+  info.appendChild(path);
+
+  row.appendChild(info);
+
+  const unarchiveBtn = document.createElement("button");
+  unarchiveBtn.className = "unarchive-btn";
+  unarchiveBtn.textContent = "Unarchive";
+  unarchiveBtn.addEventListener("click", () => {
+    unarchiveProject(project.path);
+  });
+  row.appendChild(unarchiveBtn);
+
+  return row;
+}
+
+function renderArchivedProjects(projects) {
+  const container = document.getElementById("archived-projects");
+  container.innerHTML = "";
+
+  if (projects.length === 0) {
+    return;
+  }
+
+  const heading = document.createElement("h2");
+  heading.textContent = "Archived Projects";
+  container.appendChild(heading);
+
+  for (const project of projects) {
+    container.appendChild(renderArchivedProjectRow(project));
+  }
+
+  const errorEl = document.createElement("p");
+  errorEl.id = "archived-projects-error";
+  errorEl.setAttribute("role", "alert");
+  container.appendChild(errorEl);
+}
+
+async function loadArchivedProjects() {
+  const response = await fetch("/api/projects/inactive");
+  if (!response.ok) {
+    throw new Error(`Failed to load archived projects: HTTP ${response.status}`);
+  }
+  const projects = await response.json();
+  renderArchivedProjects(projects);
 }
 
 function updateProjectUI(projectPath) {
@@ -401,6 +502,75 @@ function updateProjectUI(projectPath) {
   refreshBtn.disabled = isLoading || syncingAll;
   removeBtn.disabled = isLoading || syncingAll;
   loadingIndicator.style.display = isLoading ? "inline-block" : "none";
+}
+
+function renderRecommendation(recommendation) {
+  const item = document.createElement("div");
+  item.className = "recommendation";
+
+  const path = document.createElement("p");
+  path.className = "recommendation-path";
+  path.textContent = recommendation.project_path;
+  item.appendChild(path);
+
+  const badge = document.createElement("span");
+  badge.className = `confidence-badge confidence-${recommendation.confidence}`;
+  badge.textContent = recommendation.confidence;
+  item.appendChild(badge);
+
+  const reason = document.createElement("p");
+  reason.className = "recommendation-reason";
+  reason.textContent = recommendation.reason;
+  item.appendChild(reason);
+
+  if (recommendation.command) {
+    const command = document.createElement("code");
+    command.className = "recommendation-command";
+    command.textContent = recommendation.command;
+    item.appendChild(command);
+  }
+
+  if (recommendation.blocking_question) {
+    const question = document.createElement("p");
+    question.className = "recommendation-blocking-question";
+    question.textContent = recommendation.blocking_question;
+    item.appendChild(question);
+  }
+
+  if (recommendation.candidates.length > 0) {
+    const candidates = document.createElement("ul");
+    candidates.className = "recommendation-candidates";
+    for (const candidate of recommendation.candidates) {
+      const candidateItem = document.createElement("li");
+      candidateItem.textContent = candidate;
+      candidates.appendChild(candidateItem);
+    }
+    item.appendChild(candidates);
+  }
+
+  return item;
+}
+
+async function loadRecommendations() {
+  const container = document.getElementById("next-action-content");
+  try {
+    const response = await fetch("/api/recommendations");
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const recommendations = await response.json();
+
+    container.innerHTML = "";
+    for (const recommendation of recommendations) {
+      container.appendChild(renderRecommendation(recommendation));
+    }
+  } catch (error) {
+    container.innerHTML = "";
+    const errorEl = document.createElement("p");
+    errorEl.className = "recommendation-error";
+    errorEl.textContent = `Failed to load recommendations: ${error.message}`;
+    container.appendChild(errorEl);
+  }
 }
 
 async function loadProjects() {
@@ -433,6 +603,8 @@ async function autosyncAll() {
     for (const path of paths) {
       await syncProject(path);
     }
+
+    loadRecommendations();
   } finally {
     syncingAll = false;
     for (const article of document.querySelectorAll("article[data-project-path]")) {
@@ -497,6 +669,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     projectsContainer.innerHTML =
       '<p style="color: red;">Failed to load projects. Please refresh the page.</p>';
   }
+  try {
+    await loadArchivedProjects();
+  } catch (error) {
+    console.error("Failed to load archived projects:", error);
+  }
+  loadRecommendations();
 
   const syncAllBtn = document.getElementById("sync-all-btn");
   syncAllBtn.addEventListener("click", syncAllProjects);
@@ -525,6 +703,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       input.value = "";
       await loadProjects();
       applyExpandedState();
+      loadRecommendations();
     } catch (error) {
       errorEl.textContent = `Error: ${error.message}`;
     }

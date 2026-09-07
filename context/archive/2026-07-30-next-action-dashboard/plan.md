@@ -165,14 +165,18 @@ Ensure recommendation data stays current by reloading after all user actions tha
 
 **File**: `dist/app.js`
 
-**Intent**: Keep panel aligned with refresh workflows.
+**Intent**: Keep panel aligned with refresh workflows without redundant reloads.
 
-**Contract**: Trigger recommendation reload after:
-- successful `syncProject` refresh cycle,
-- `syncAllProjects` completion,
-- `autosyncAll` completion.
+**Contract**: Do not hook `loadRecommendations()` inside `syncProject()` itself — it is
+called once per project by both the batch flows below, so hooking there would fire the
+recommendations fetch N times per batch action. Instead, trigger `loadRecommendations()`
+only at these call sites:
+- the per-project Refresh button's click handler, after its `syncProject` call resolves,
+- `syncAllProjects` completion (after all per-project syncs settle),
+- `autosyncAll` completion (after its sync loop finishes).
 
-Reload behavior should avoid duplicate noisy UI updates and preserve existing loading/error behavior.
+This mirrors the existing pattern where `syncAllProjects`/`autosyncAll` already keep
+batch-level UI updates (status text, article reordering) out of `syncProject` itself.
 
 ### Success Criteria:
 
@@ -234,8 +238,8 @@ None. This is additive API + UI behavior with no persisted schema changes.
 
 #### Automated
 
-- [ ] 1.1 `python -m uv run pytest tests/test_api.py -v` passes with recommendations endpoint coverage
-- [ ] 1.2 `python -m uv run python -c "import app.main"` succeeds
+- [x] 1.1 `python -m uv run pytest tests/test_api.py -v` passes with recommendations endpoint coverage — 92226e1
+- [x] 1.2 `python -m uv run python -c "import app.main"` succeeds — 92226e1
 
 #### Manual
 
@@ -246,21 +250,22 @@ None. This is additive API + UI behavior with no persisted schema changes.
 
 #### Automated
 
-- [ ] 2.1 `python -m uv run python -c "import app.main"` succeeds
-- [ ] 2.2 `python -m uv run pytest tests/test_api.py -v` remains green after frontend changes
+- [x] 2.1 `python -m uv run python -c "import app.main"` succeeds — 94548a2
+- [x] 2.2 `python -m uv run pytest tests/test_api.py -v` remains green after frontend changes — 94548a2
 
 #### Manual
 
 - [ ] 2.3 Dashboard shows one recommendation entry per tracked project
-- [ ] 2.4 Low-confidence recommendations show reason, blocking question, and candidates
-- [ ] 2.5 Recommendation panel fetch failure is visible but non-breaking
+- [ ] 2.4 High-confidence entries show command and reason clearly
+- [ ] 2.5 Low-confidence recommendations show reason, blocking question, and candidates
+- [ ] 2.6 Recommendation panel fetch failure is visible but non-breaking
 
 ### Phase 3: Wire Recommendation Refresh Lifecycle
 
 #### Automated
 
-- [ ] 3.1 `python -m uv run pytest tests/test_api.py -v` passes
-- [ ] 3.2 `python -m uv run python -c "import app.main"` succeeds
+- [x] 3.1 `python -m uv run pytest tests/test_api.py -v` passes — f12fad0
+- [x] 3.2 `python -m uv run python -c "import app.main"` succeeds — f12fad0
 
 #### Manual
 

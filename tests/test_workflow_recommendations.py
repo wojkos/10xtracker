@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from app import projects
+from app.projects import TrackedProject
 from app.workflow_recommendations import get_next_10x_action
 
 
@@ -65,7 +66,7 @@ updated: 2026-07-28
         foundation_dir = project / "context" / "foundation"
         foundation_dir.mkdir(parents=True)
         (foundation_dir / "roadmap.md").write_text(roadmap, encoding="utf-8")
-    projects.save_tracked_projects([project])
+    projects.save_tracked_projects([TrackedProject(path=project)])
     return project
 
 

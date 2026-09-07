@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from app import projects
+from app.projects import TrackedProject
 from app.recent_work import get_recent_work
 
 
@@ -33,7 +34,7 @@ updated: {updated}
 def test_returns_tracked_changes_in_descending_updated_order(tmp_path: Path) -> None:
     first = _make_project(tmp_path, "first", [("older", "2026-07-01")])
     second = _make_project(tmp_path, "second", [("newer", "2026-07-02T12:00:00")])
-    projects.save_tracked_projects([first, second])
+    projects.save_tracked_projects([TrackedProject(path=first), TrackedProject(path=second)])
 
     recent_work = get_recent_work()
 
@@ -48,7 +49,7 @@ def test_invalid_or_missing_dates_follow_dated_records(tmp_path: Path) -> None:
         "fixture",
         [("dated", "2026-07-02"), ("invalid", "not-a-date"), ("missing", "")],
     )
-    projects.save_tracked_projects([project])
+    projects.save_tracked_projects([TrackedProject(path=project)])
 
     recent_work = get_recent_work()
 
@@ -62,7 +63,7 @@ def test_limit_is_bounded_and_positive(tmp_path: Path) -> None:
         "fixture",
         [("first", "2026-07-01"), ("second", "2026-07-02")],
     )
-    projects.save_tracked_projects([project])
+    projects.save_tracked_projects([TrackedProject(path=project)])
 
     assert [item.change.change_id for item in get_recent_work(limit=1)] == ["second"]
     with pytest.raises(ValueError, match="between 1 and 100"):
@@ -74,7 +75,7 @@ def test_limit_is_bounded_and_positive(tmp_path: Path) -> None:
 def test_uses_only_persisted_tracked_projects(tmp_path: Path) -> None:
     tracked = _make_project(tmp_path, "tracked", [("visible", "2026-07-02")])
     _make_project(tmp_path, "untracked", [("hidden", "2026-07-03")])
-    projects.save_tracked_projects([tracked])
+    projects.save_tracked_projects([TrackedProject(path=tracked)])
 
     recent_work = get_recent_work()
 

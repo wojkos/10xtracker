@@ -3,19 +3,32 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.projects import add_tracked_project, load_tracked_projects, remove_tracked_project
-from app.project_status import ProjectResponse, get_project_status, get_project_statuses
+from app.projects import (
+    add_tracked_project,
+    load_tracked_projects,
+    remove_tracked_project,
+    set_project_active,
+)
+from app.project_status import (
+    ProjectResponse,
+    ProjectSummary,
+    get_inactive_projects,
+    get_project_status,
+    get_project_statuses,
+)
 from app.settings import load_autosync_settings, save_autosync_settings
+from app.workflow_recommendations import WorkflowRecommendation, get_next_10x_action
 
 router = APIRouter()
 
 
-class AddProjectRequest(BaseModel):
+class ProjectPathRequest(BaseModel):
     path: str
 
 
-class RemoveProjectRequest(BaseModel):
+class ProjectActiveRequest(BaseModel):
     path: str
+    active: bool
 
 
 class SettingsResponse(BaseModel):
@@ -29,7 +42,7 @@ class UpdateSettingsRequest(BaseModel):
 
 
 @router.post("/projects", response_model=ProjectResponse)
-def add_project(request: AddProjectRequest) -> ProjectResponse:
+def add_project(request: ProjectPathRequest) -> ProjectResponse:
     try:
         added_path = add_tracked_project(Path(request.path))
     except ValueError as exc:
@@ -43,12 +56,31 @@ def list_projects() -> list[ProjectResponse]:
 
 
 @router.delete("/projects")
-def remove_project(request: RemoveProjectRequest) -> dict[str, bool]:
+def remove_project(request: ProjectPathRequest) -> dict[str, bool]:
     try:
         remove_tracked_project(Path(request.path))
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
     return {"removed": True}
+
+
+@router.put("/projects/active")
+def set_active(request: ProjectActiveRequest) -> dict[str, bool]:
+    try:
+        set_project_active(Path(request.path), request.active)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return {"active": request.active}
+
+
+@router.get("/projects/inactive", response_model=list[ProjectSummary])
+def list_inactive_projects() -> list[ProjectSummary]:
+    return get_inactive_projects()
+
+
+@router.get("/recommendations", response_model=list[WorkflowRecommendation])
+def get_recommendations() -> list[WorkflowRecommendation]:
+    return get_next_10x_action()
 
 
 @router.get("/settings", response_model=SettingsResponse)
