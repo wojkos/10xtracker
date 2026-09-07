@@ -1,10 +1,10 @@
 ---
 change_id: archive-project
 title: Archive or block inactive projects to skip folder scanning
-status: implemented
+status: archived
 created: 2026-09-07
 updated: 2026-09-07
-archived_at: null
+archived_at: 2026-09-07T15:52:22Z
 ---
 
 ## Notes
