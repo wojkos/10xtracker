@@ -72,6 +72,20 @@ body {
   background-color: #eadbcb;
 }
 
+.archive-btn {
+  padding: 0.5em 1em;
+  background-color: #eef0f4;
+  color: #3d4a5c;
+  border: 1px solid #c9d0da;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.archive-btn:hover {
+  background-color: #dde2e9;
+}
+
 #autosync-controls {
   display: flex;
   align-items: center;
@@ -343,4 +357,65 @@ article h2 {
   margin-top: 0.15em;
   font-size: 0.85em;
   color: var(--text-secondary);
+}
+
+#archived-projects {
+  margin-top: 1rem;
+}
+
+#archived-projects h2 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+}
+
+.archived-project-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6em 0.8em;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  margin-bottom: 0.5em;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+}
+
+.archived-project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  overflow: hidden;
+}
+
+.archived-project-path {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unarchive-btn {
+  padding: 0.4em 0.8em;
+  background-color: var(--accent);
+  color: var(--surface);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  flex-shrink: 0;
+}
+
+.unarchive-btn:hover {
+  background-color: var(--accent-hover);
+}
+
+#archived-projects-error {
+  min-height: 1.1rem;
+  margin: 0.25rem 0 0 0;
+  color: var(--text-error);
+  font-size: 0.85rem;
 }

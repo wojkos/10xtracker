@@ -261,22 +261,22 @@ No standalone migration script. `load_tracked_projects()` accepts the legacy bar
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `uv run pytest tests/test_projects.py tests/test_api.py`
-- [x] 2.2 Full test suite passes: `uv run pytest`
+- [x] 2.1 Unit tests pass: `uv run pytest tests/test_projects.py tests/test_api.py` — e41f52a
+- [x] 2.2 Full test suite passes: `uv run pytest` — e41f52a
 
 ### Phase 3: Frontend UI
 
 #### Automated
 
-- [ ] 3.1 Full test suite still passes (no backend regressions): `uv run pytest`
+- [x] 3.1 Full test suite still passes (no backend regressions): `uv run pytest`
 
 #### Manual
 
-- [ ] 3.2 Archiving a project (with confirmation) removes it from the main list and summary stats, and it appears in the Archived Projects section with only name/path.
-- [ ] 3.3 Unarchiving (no confirmation prompt) returns the project to the main list, resumes scanning, and removes it from the Archived section.
-- [ ] 3.4 A page reload after archiving preserves the archived state (data persisted in `tracked_projects.json`).
-- [ ] 3.5 Sync All and autosync do not attempt to refresh archived projects, and do not error because of their presence.
-- [ ] 3.6 Adding a brand-new project still works unaffected (new projects default to active).
+- [x] 3.2 Archiving a project (with confirmation) removes it from the main list and summary stats, and it appears in the Archived Projects section with only name/path.
+- [x] 3.3 Unarchiving (no confirmation prompt) returns the project to the main list, resumes scanning, and removes it from the Archived section.
+- [x] 3.4 A page reload after archiving preserves the archived state (data persisted in `tracked_projects.json`).
+- [x] 3.5 Sync All and autosync do not attempt to refresh archived projects, and do not error because of their presence.
+- [x] 3.6 Adding a brand-new project still works unaffected (new projects default to active).
 
 ### Phase 4: Docs Reconciliation
 

@@ -159,6 +159,15 @@ function renderProjectSection(project) {
   });
   controls.appendChild(removeBtn);
 
+  const archiveBtn = document.createElement("button");
+  archiveBtn.className = "archive-btn";
+  archiveBtn.textContent = "Archive";
+  archiveBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    archiveProject(project.path);
+  });
+  controls.appendChild(archiveBtn);
+
   header.appendChild(controls);
   article.appendChild(header);
 
@@ -359,6 +368,128 @@ async function removeProject(projectPath) {
   }
 }
 
+async function archiveProject(projectPath) {
+  if (!window.confirm(`Archive "${projectPath}"? It will stop being scanned until you unarchive it.`)) {
+    return;
+  }
+
+  const errorDiv = document.getElementById(`sync-error-${projectPath}`);
+
+  try {
+    const response = await fetch("/api/projects/active", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: projectPath, active: false }),
+    });
+    const body = await response.json();
+
+    if (!response.ok) {
+      if (errorDiv) {
+        errorDiv.textContent = body.detail || "Failed to archive project.";
+      }
+      return;
+    }
+
+    await loadProjects();
+    applyExpandedState();
+    await loadArchivedProjects();
+    loadRecommendations();
+  } catch (error) {
+    if (errorDiv) {
+      errorDiv.textContent = `Error: ${error.message}`;
+    }
+  }
+}
+
+async function unarchiveProject(projectPath) {
+  const errorEl = document.getElementById("archived-projects-error");
+
+  try {
+    const response = await fetch("/api/projects/active", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: projectPath, active: true }),
+    });
+    const body = await response.json();
+
+    if (!response.ok) {
+      if (errorEl) {
+        errorEl.textContent = body.detail || "Failed to unarchive project.";
+      }
+      return;
+    }
+
+    await loadProjects();
+    applyExpandedState();
+    await loadArchivedProjects();
+    loadRecommendations();
+  } catch (error) {
+    if (errorEl) {
+      errorEl.textContent = `Error: ${error.message}`;
+    }
+  }
+}
+
+function renderArchivedProjectRow(project) {
+  const row = document.createElement("div");
+  row.className = "archived-project-row";
+
+  const info = document.createElement("div");
+  info.className = "archived-project-info";
+
+  const name = document.createElement("strong");
+  name.textContent = project.name;
+  info.appendChild(name);
+
+  const path = document.createElement("span");
+  path.className = "archived-project-path";
+  path.textContent = project.path;
+  info.appendChild(path);
+
+  row.appendChild(info);
+
+  const unarchiveBtn = document.createElement("button");
+  unarchiveBtn.className = "unarchive-btn";
+  unarchiveBtn.textContent = "Unarchive";
+  unarchiveBtn.addEventListener("click", () => {
+    unarchiveProject(project.path);
+  });
+  row.appendChild(unarchiveBtn);
+
+  return row;
+}
+
+function renderArchivedProjects(projects) {
+  const container = document.getElementById("archived-projects");
+  container.innerHTML = "";
+
+  if (projects.length === 0) {
+    return;
+  }
+
+  const heading = document.createElement("h2");
+  heading.textContent = "Archived Projects";
+  container.appendChild(heading);
+
+  for (const project of projects) {
+    container.appendChild(renderArchivedProjectRow(project));
+  }
+
+  const errorEl = document.createElement("p");
+  errorEl.id = "archived-projects-error";
+  errorEl.setAttribute("role", "alert");
+  container.appendChild(errorEl);
+}
+
+async function loadArchivedProjects() {
+  const response = await fetch("/api/projects/inactive");
+  if (!response.ok) {
+    throw new Error(`Failed to load archived projects: HTTP ${response.status}`);
+  }
+  const projects = await response.json();
+  renderArchivedProjects(projects);
+}
+
 function updateProjectUI(projectPath) {
   const section = document.getElementById(`project-${projectPath}`);
   if (!section) return;
@@ -537,6 +668,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const projectsContainer = document.getElementById("projects");
     projectsContainer.innerHTML =
       '<p style="color: red;">Failed to load projects. Please refresh the page.</p>';
+  }
+  try {
+    await loadArchivedProjects();
+  } catch (error) {
+    console.error("Failed to load archived projects:", error);
   }
   loadRecommendations();
 
