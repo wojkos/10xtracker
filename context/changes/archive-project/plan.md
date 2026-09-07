@@ -255,14 +255,14 @@ No standalone migration script. `load_tracked_projects()` accepts the legacy bar
 
 #### Automated
 
-- [ ] 1.1 Unit tests pass: `uv run pytest tests/test_projects.py`
+- [x] 1.1 Unit tests pass: `uv run pytest tests/test_projects.py` — 355eaf1
 
 ### Phase 2: Scan Pipeline & API Surface
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `uv run pytest tests/test_projects.py tests/test_api.py`
-- [ ] 2.2 Full test suite passes: `uv run pytest`
+- [x] 2.1 Unit tests pass: `uv run pytest tests/test_projects.py tests/test_api.py`
+- [x] 2.2 Full test suite passes: `uv run pytest`
 
 ### Phase 3: Frontend UI
 

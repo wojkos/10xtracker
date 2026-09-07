@@ -319,6 +319,52 @@ def test_get_recommendations_returns_high_confidence_entry(
     assert body[0]["reason"]
 
 
+def test_put_active_false_excludes_from_list_and_appears_in_inactive(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+
+    response = client.put(
+        "/api/projects/active", json={"path": str(project.resolve()), "active": False}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"active": False}
+    assert client.get("/api/projects").json() == []
+    inactive = client.get("/api/projects/inactive").json()
+    assert len(inactive) == 1
+    assert inactive[0]["name"] == "fixture-project"
+
+
+def test_put_active_true_restores_to_list_and_removes_from_inactive(
+    client: TestClient, tmp_path: Path
+) -> None:
+    project = _make_fixture_project(tmp_path)
+    client.post("/api/projects", json={"path": str(project)})
+    client.put("/api/projects/active", json={"path": str(project.resolve()), "active": False})
+
+    response = client.put(
+        "/api/projects/active", json={"path": str(project.resolve()), "active": True}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"active": True}
+    assert len(client.get("/api/projects").json()) == 1
+    assert client.get("/api/projects/inactive").json() == []
+
+
+def test_put_active_on_untracked_path_returns_404(client: TestClient, tmp_path: Path) -> None:
+    project = _make_fixture_project(tmp_path)
+
+    response = client.put(
+        "/api/projects/active", json={"path": str(project), "active": False}
+    )
+
+    assert response.status_code == 404
+    assert "detail" in response.json()
+
+
 def test_get_recommendations_returns_low_confidence_entry(
     client: TestClient, tmp_path: Path
 ) -> None:
