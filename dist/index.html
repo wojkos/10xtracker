@@ -22,12 +22,19 @@
     </div>
     <button id="sync-all-btn" type="button">Sync All</button>
     <span id="sync-all-status"></span>
+    <button id="next-action-toggle" type="button">
+      Next action <span id="next-action-count" class="count-badge" hidden></span>
+    </button>
   </div>
 
-  <div id="next-action">
-    <h2>Next action</h2>
+  <div id="next-action-overlay" hidden></div>
+  <aside id="next-action" hidden>
+    <div id="next-action-header">
+      <h2>Next action</h2>
+      <button id="next-action-close" type="button" aria-label="Close">&times;</button>
+    </div>
     <div id="next-action-content"></div>
-  </div>
+  </aside>
 
   <div id="projects"></div>
     <form id="add-project-form">

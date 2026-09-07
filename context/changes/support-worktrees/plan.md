@@ -450,12 +450,12 @@ models are unaffected.
 
 #### Automated
 
-- [x] 3.1 uv run pytest still passes
+- [x] 3.1 uv run pytest still passes — da7b363
 
 #### Manual
 
-- [x] 3.2 Branch name visibly rendered next to its command in the dashboard
-- [x] 3.3 Recommendation with no branch renders unchanged, no stray placeholder text
+- [x] 3.2 Branch name visibly rendered next to its command in the dashboard — da7b363
+- [x] 3.3 Recommendation with no branch renders unchanged, no stray placeholder text — da7b363
 
 ### Phase 4: End-to-End Test
 

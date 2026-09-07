@@ -45,3 +45,10 @@ The lesson focus is safe throughput: isolated contexts, choosing the right execu
 Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
 
 <!-- END @przeprogramowani/10x-cli -->
+
+## Project Rules
+
+### Language
+
+- **All files written to disk** (change.md, research.md, plan.md, plan-brief.md, any artifact in `context/`) **must be written in English**.
+- Conversations with the user may be conducted in any language.

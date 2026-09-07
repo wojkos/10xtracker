@@ -19,18 +19,20 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-def _make_fixture_project(tmp_path: Path) -> Path:
-    project = tmp_path / "fixture-project"
+def _make_fixture_project(
+    tmp_path: Path, name: str = "fixture-project", updated: str = "2026-07-23"
+) -> Path:
+    project = tmp_path / name
     changes_dir = project / "context" / "changes"
     change_folder = changes_dir / "some-change"
     change_folder.mkdir(parents=True)
     (change_folder / "change.md").write_text(
-        """---
+        f"""---
 change_id: some-change
 title: Some Change
 status: implementing
-created: 2026-07-23
-updated: 2026-07-23
+created: {updated}
+updated: {updated}
 archived_at: null
 ---
 """,
@@ -205,30 +207,11 @@ def test_post_duplicate_path_returns_400(client: TestClient, tmp_path: Path) -> 
     assert response.status_code == 400
 
 
-def _make_fixture_project_with_update_date(tmp_path: Path, name: str, updated: str) -> Path:
-    project = tmp_path / name
-    change_folder = project / "context" / "changes" / "some-change"
-    change_folder.mkdir(parents=True)
-    (change_folder / "change.md").write_text(
-        f"""---
-change_id: some-change
-title: Some Change
-status: implementing
-created: {updated}
-updated: {updated}
-archived_at: null
----
-""",
-        encoding="utf-8",
-    )
-    return project
-
-
 def test_get_orders_projects_by_most_recently_updated_change(
     client: TestClient, tmp_path: Path
 ) -> None:
-    older = _make_fixture_project_with_update_date(tmp_path, "older-project", "2026-01-01")
-    newer = _make_fixture_project_with_update_date(tmp_path, "newer-project", "2026-06-15")
+    older = _make_fixture_project(tmp_path, name="older-project", updated="2026-01-01")
+    newer = _make_fixture_project(tmp_path, name="newer-project", updated="2026-06-15")
     client.post("/api/projects", json={"path": str(older)})
     client.post("/api/projects", json={"path": str(newer)})
 
