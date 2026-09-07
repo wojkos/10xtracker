@@ -437,14 +437,14 @@ models are unaffected.
 
 #### Automated
 
-- [x] 2.1 test_multiple_active_changes_block_a_command unchanged and still passes (single combined blocked entry)
-- [x] 2.2 New test: single active change with worktree returns one recommendation with branch set
-- [x] 2.3 All existing test_workflow_recommendations.py cases still pass unchanged
-- [x] 2.4 uv run pytest passes
+- [x] 2.1 test_multiple_active_changes_block_a_command unchanged and still passes (single combined blocked entry) — a3065a3
+- [x] 2.2 New test: single active change with worktree returns one recommendation with branch set — a3065a3
+- [x] 2.3 All existing test_workflow_recommendations.py cases still pass unchanged — a3065a3
+- [x] 2.4 uv run pytest passes — a3065a3
 
 #### Manual
 
-- [x] 2.5 GET /api/recommendations manually verified: single active change with worktree shows branch; multi-active-change project still shows one combined blocked entry
+- [x] 2.5 GET /api/recommendations manually verified: single active change with worktree shows branch; multi-active-change project still shows one combined blocked entry — a3065a3
 
 ### Phase 3: Frontend Rendering
 
@@ -454,8 +454,8 @@ models are unaffected.
 
 #### Manual
 
-- [ ] 3.2 Branch name visibly rendered next to its command in the dashboard
-- [ ] 3.3 Recommendation with no branch renders unchanged, no stray placeholder text
+- [x] 3.2 Branch name visibly rendered next to its command in the dashboard
+- [x] 3.3 Recommendation with no branch renders unchanged, no stray placeholder text
 
 ### Phase 4: End-to-End Test
 
