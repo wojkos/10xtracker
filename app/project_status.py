@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from app.changes import ChangeSummary, list_changes
 from app.projects import load_tracked_projects
+from app.worktrees import get_worktree_branch_map
 
 
 class ProjectResponse(BaseModel):
@@ -13,12 +14,27 @@ class ProjectResponse(BaseModel):
 
 
 def get_project_status(project_path: Path) -> ProjectResponse:
+    changes = list_changes(project_path / "context")
+    branch_map = get_worktree_branch_map(project_path, {change.change_id for change in changes})
+    changes = [
+        branch_map[change.change_id][1].model_copy(
+            update={"branch": branch_map[change.change_id][0]}
+        )
+        if change.change_id in branch_map
+        else change
+        for change in changes
+    ]
     return ProjectResponse(
         path=str(project_path),
         name=project_path.name,
-        changes=list_changes(project_path / "context"),
+        changes=changes,
     )
 
 
+def _latest_update(project: ProjectResponse) -> str:
+    return max((c.updated for c in project.changes if c.updated and not c.error), default="")
+
+
 def get_project_statuses() -> list[ProjectResponse]:
-    return [get_project_status(path) for path in load_tracked_projects()]
+    statuses = [get_project_status(path) for path in load_tracked_projects()]
+    return sorted(statuses, key=_latest_update, reverse=True)

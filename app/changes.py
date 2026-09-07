@@ -17,6 +17,7 @@ class ChangeSummary(BaseModel):
     error: str | None = None
     phase_progress: PhaseProgress | None = None
     roadmap_correlation: RoadmapCorrelation | None = None
+    branch: str | None = None
 
 
 def _extract_frontmatter(text: str) -> dict:
