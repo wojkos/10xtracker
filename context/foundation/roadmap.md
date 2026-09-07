@@ -194,7 +194,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Parked
 
 - **Autosync reliability (retry/backoff on failed syncs)** — Why parked: PRD Success Criteria "Secondary" explicitly marks autosync reliability as a v2+ feature.
-- **Archive actions from the UI** — Why parked: PRD Non-Goals — "Not an orchestration tool"; the app visualizes only, archiving stays outside the app. Also listed as v2+ in Success Criteria.
+- **Archive actions on a tracked project's own files (e.g. archiving a change from the dashboard)** — Why parked: PRD Non-Goals — "Not an orchestration tool"; the app visualizes only, actions on a project's own content stay outside the app. (Project-level active/inactive toggle — internal dashboard state, not a file action — shipped in v1, see Done list.)
 - **Export (of dashboard data)** — Why parked: PRD Success Criteria "Secondary" marks export as a v2+ feature.
 - **File editing from the UI** — Why parked: PRD Non-Goals — "Not a file editor"; the app is read-only by design.
 - **API / MCP integration for external tools** — Why parked: PRD Non-Goals — "Not an API or MCP feature".
@@ -211,3 +211,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-04: see which roadmap items each change addresses** — Archived 2026-07-24 → `context/archive/2026-07-24-roadmap-correlation-view/`. Lesson: —.
 - **S-07: user can trigger a sync of all added projects in one action.** — Archived 2026-07-24 → `context/archive/2026-07-24-sync-all-projects/`. Lesson: —.
 - **S-03: user can see phase progress within each change (current phase, tasks completed / total), read from `plan.md`.** — Archived 2026-07-24 → `context/archive/2026-07-23-change-phase-progress/`. Lesson: —.
+- **S-09: user can archive/unarchive a tracked project (per-project active flag) to skip it from scanning without removing it.** — Shipped 2026-09-07, not yet archived → `context/changes/archive-project/`. Lesson: —.

@@ -13,6 +13,11 @@ class ProjectResponse(BaseModel):
     changes: list[ChangeSummary]
 
 
+class ProjectSummary(BaseModel):
+    path: str
+    name: str
+
+
 def get_project_status(project_path: Path) -> ProjectResponse:
     changes = list_changes(project_path / "context")
     branch_map = get_worktree_branch_map(project_path, {change.change_id for change in changes})
@@ -36,5 +41,17 @@ def _latest_update(project: ProjectResponse) -> str:
 
 
 def get_project_statuses() -> list[ProjectResponse]:
-    statuses = [get_project_status(path) for path in load_tracked_projects()]
+    statuses = [
+        get_project_status(entry.path)
+        for entry in load_tracked_projects()
+        if entry.active
+    ]
     return sorted(statuses, key=_latest_update, reverse=True)
+
+
+def get_inactive_projects() -> list[ProjectSummary]:
+    return [
+        ProjectSummary(path=str(entry.path), name=entry.path.name)
+        for entry in load_tracked_projects()
+        if not entry.active
+    ]

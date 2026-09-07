@@ -39,7 +39,7 @@ The full flow — from first app load to seeing project status — works end-to-
 
 ### Secondary
 
-None for v1. Autosync reliability, archive actions, and export are v2+ features.
+None for v1. Autosync reliability and export are v2+ features. (Per-project active/inactive toggle shipped in v1.)
 
 ### Guardrails
 
@@ -108,7 +108,7 @@ The app aggregates distributed 10xDEV project metadata (changes, roadmap, plan f
 
 - **Not a file editor:** The app is read-only. No creation, modification, or deletion of project files from the UI. Changes to projects happen outside the app.
 - **Not an API or MCP feature:** The app does not expose an API, plugin interface, or MCP integration for external tools to consume.
-- **Not an orchestration tool:** The app does not trigger actions (archiving, creating changes, updating status). It visualizes only; users manage projects outside the app.
+- **Not an orchestration tool:** The app does not trigger actions on a tracked project's own files — archiving a change, creating changes, updating status. It visualizes only; users manage project content outside the app. (This does not cover the app's own internal dashboard state, e.g. marking a tracked project active/inactive to control scanning — that is v1 scope.)
 - **Not externally integrated:** No Slack notifications, GitHub webhooks, Linear syncs, or external service integrations. Stays local and standalone.
 
 ## Open Questions
