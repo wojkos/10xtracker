@@ -382,20 +382,23 @@ function renderRecommendation(recommendation) {
   path.textContent = recommendation.project_path;
   item.appendChild(path);
 
-  const badge = document.createElement("span");
-  badge.className = `confidence-badge confidence-${recommendation.confidence}`;
-  badge.textContent = recommendation.confidence;
-  item.appendChild(badge);
-
-  const reason = document.createElement("p");
-  reason.className = "recommendation-reason";
-  reason.textContent = recommendation.reason;
-  item.appendChild(reason);
+  if (recommendation.reason) {
+    const reason = document.createElement("p");
+    reason.className = "recommendation-reason";
+    reason.textContent = recommendation.reason;
+    item.appendChild(reason);
+  }
 
   if (recommendation.command) {
     const command = document.createElement("code");
     command.className = "recommendation-command";
-    command.textContent = recommendation.command;
+    if (recommendation.branch) {
+      const branch = document.createElement("span");
+      branch.className = "recommendation-branch";
+      branch.textContent = `(${recommendation.branch}) `;
+      command.appendChild(branch);
+    }
+    command.appendChild(document.createTextNode(recommendation.command));
     item.appendChild(command);
   }
 
@@ -411,13 +414,27 @@ function renderRecommendation(recommendation) {
     candidates.className = "recommendation-candidates";
     for (const candidate of recommendation.candidates) {
       const candidateItem = document.createElement("li");
-      candidateItem.textContent = candidate;
+      const candidateCommand = recommendation.candidate_commands?.[candidate];
+      if (candidateCommand) {
+        const commandCode = document.createElement("code");
+        commandCode.className = "recommendation-command";
+        commandCode.textContent = candidateCommand;
+        candidateItem.appendChild(commandCode);
+      } else {
+        candidateItem.textContent = candidate;
+      }
       candidates.appendChild(candidateItem);
     }
     item.appendChild(candidates);
   }
 
   return item;
+}
+
+function updateNextActionCount(count) {
+  const badge = document.getElementById("next-action-count");
+  badge.textContent = String(count);
+  badge.hidden = count === 0;
 }
 
 async function loadRecommendations() {
@@ -433,13 +450,25 @@ async function loadRecommendations() {
     for (const recommendation of recommendations) {
       container.appendChild(renderRecommendation(recommendation));
     }
+    updateNextActionCount(recommendations.length);
   } catch (error) {
     container.innerHTML = "";
     const errorEl = document.createElement("p");
     errorEl.className = "recommendation-error";
     errorEl.textContent = `Failed to load recommendations: ${error.message}`;
     container.appendChild(errorEl);
+    updateNextActionCount(0);
   }
+}
+
+function openNextActionPanel() {
+  document.getElementById("next-action").hidden = false;
+  document.getElementById("next-action-overlay").hidden = false;
+}
+
+function closeNextActionPanel() {
+  document.getElementById("next-action").hidden = true;
+  document.getElementById("next-action-overlay").hidden = true;
 }
 
 async function loadProjects() {
@@ -542,6 +571,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const syncAllBtn = document.getElementById("sync-all-btn");
   syncAllBtn.addEventListener("click", syncAllProjects);
+
+  document.getElementById("next-action-toggle").addEventListener("click", openNextActionPanel);
+  document.getElementById("next-action-close").addEventListener("click", closeNextActionPanel);
+  document.getElementById("next-action-overlay").addEventListener("click", closeNextActionPanel);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeNextActionPanel();
+  });
 
   const form = document.getElementById("add-project-form");
   const input = document.getElementById("project-path");

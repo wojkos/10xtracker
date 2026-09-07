@@ -5,10 +5,13 @@
 Extend 10xtracker's recommendation engine so it detects git worktrees
 belonging to a tracked project, correlates each worktree to the active
 change it is processing, and uses that worktree's `change.md` as the
-authoritative status for that change. Instead of blocking whenever more
-than one change is active, the app now returns one recommendation per
-active change — worktree-backed changes get a real, branch-labeled command;
-changes with no worktree still get an individual "which one next" prompt.
+authoritative status for that change. The app still returns exactly one
+`WorkflowRecommendation` per project — behavior when more than one change
+is active is unchanged — but when the single active change (or, in a
+multi-active-change project, one of its blocked candidates) has a linked
+git worktree, the recommendation carries a `branch` field showing which
+branch is handling it, and the dashboard renders that as a `(branch)`
+label next to the command.
 
 ## Current State Analysis
 
@@ -20,10 +23,12 @@ changes with no worktree still get an individual "which one next" prompt.
   returns exactly one `WorkflowRecommendation` per project. When
   `len(active_changes) > 1` it always blocks with
   `"Which change can be worked on next?"`, listing every active `change_id`
-  as a candidate (line 200-213).
-- [dist/app.js:399-422](../../../dist/app.js) already renders `blocking_question`,
-  `candidates`, and `candidate_commands` as a list — the pattern a `branch`
-  label slots into.
+  as a candidate (line 200-213). This one-recommendation-per-project shape
+  is preserved by this plan — only a `branch` field is added.
+- [dist/app.js:376-421](../../../dist/app.js) already renders one
+  `.recommendation` block per array entry, with `command` rendered as a
+  `<code>` element — the pattern a `branch` label slots into by prepending
+  a small span before the command text.
 - [tests/test_api.py:22-41](../../../tests/test_api.py) and
   `tests/test_workflow_recommendations.py` build fixture projects as plain
   directories (`validate_project_path` only checks for a `context/changes`
@@ -33,16 +38,19 @@ changes with no worktree still get an individual "which one next" prompt.
 
 ## Desired End State
 
-`GET /api/recommendations` returns one `WorkflowRecommendation` per active
-change. When an active change has a linked git worktree (a worktree whose
+`GET /api/recommendations` still returns exactly one `WorkflowRecommendation`
+per project, unchanged in shape and count from today. When a project's
+single active change has a linked git worktree (a worktree whose
 `context/changes/<id>/` folder exists), that change's status comes from the
 worktree's own `change.md`, and the recommendation carries a `branch` field
 showing which branch is handling it. The dashboard's next-action panel
-renders that as a `(branch)` prefix next to the command. Changes with no
-worktree keep today's individually-blocked behavior. Verify by tracking a
-project with two active changes, one of them backed by a `git worktree add`
-checkout, and confirming `/api/recommendations` returns two entries: one
-real command with `branch` set, one blocked entry naming just that change.
+renders that as a `(branch)` prefix next to the command. Projects with more
+than one active change keep today's single combined blocked entry
+(`candidates` + `candidate_commands`) exactly as before. Verify by tracking
+a project with a single active change backed by a `git worktree add`
+checkout, and confirming `/api/recommendations` returns one entry with
+`branch` set and a real `command` reflecting the worktree's own
+`change.md`.
 
 ### Key Discoveries:
 
@@ -78,6 +86,12 @@ real command with `branch` set, one blocked entry naming just that change.
 
 ## What We're NOT Doing
 
+- Restructuring the multi-active-change path into one recommendation per
+  active change — an earlier draft of this plan attempted that and it was
+  descoped back down after live manual testing showed it added more UI
+  volume than wanted. The multi-active-change project keeps today's single
+  combined blocked entry (`candidates` + `candidate_commands`) unchanged;
+  `branch` is only ever surfaced on the single-active-change happy path.
 - Discovering a change that exists *only* inside a worktree and not yet in
   the main checkout — correlation only checks worktrees against change_ids
   already known from the main checkout's `list_changes()` result.
@@ -101,21 +115,18 @@ Add a small, dependency-free worktree-detection module that shells out to
 function against each worktree path to find matches. Thread the result
 through `project_status.py` (as the source of truth for a matched change's
 `ChangeSummary`) and into `workflow_recommendations.py` (as a `branch` label
-on the resulting `WorkflowRecommendation`). Restructure the one
-multi-active-change code path so it returns a list instead of a single
-blocked entry. Render the new field in the existing list-rendering code in
-`dist/app.js`.
+on the resulting `WorkflowRecommendation`), without changing
+`_recommend_for_project`'s one-recommendation-per-project return shape.
+Render the new field next to the rendered command in `dist/app.js`.
 
 ## Critical Implementation Details
 
-- **Existing test must be rewritten, not just supplemented**:
+- **Existing multi-active-change test stays unchanged**:
   `tests/test_workflow_recommendations.py::test_multiple_active_changes_block_a_command`
-  (line 136) currently asserts a single recommendation with
-  `candidates == ["first", "second"]`. Under the new behavior, two active
-  changes with no worktree now produce **two** individually-blocked
-  recommendations (`candidates == ["first"]` and `candidates == ["second"]`
-  respectively), not one combined entry. This test's assertions must change
-  as part of Phase 2, not be left passing by accident.
+  continues to assert a single combined blocked recommendation with
+  `candidates == ["first", "second"]`. Phase 2 must not alter this test's
+  assertions or the code path it covers — only add the `branch` field and
+  thread it through the single-active-change path.
 - **Git-failure fallback is load-bearing, not optional**: every existing
   fixture project in both test files is a plain directory, not a git repo.
   `git -C <path> worktree list --porcelain` will exit non-zero for all of
@@ -214,13 +225,13 @@ For each match, replace the corresponding entry in `changes` with
 
 ---
 
-## Phase 2: Recommendation Engine Restructure
+## Phase 2: Recommendation Engine Branch Threading
 
 ### Overview
 
-Change the multi-active-change path from a single blocked entry into one
-recommendation per active change, and surface `branch` on the recommendation
-itself.
+Surface `branch` on `WorkflowRecommendation` for the single-active-change
+happy path, without changing `_recommend_for_project`'s one-recommendation-
+per-project return shape or the multi-active-change blocked-entry behavior.
 
 ### Changes Required:
 
@@ -236,53 +247,39 @@ whether the change ended up actionable or still blocked.
 **Contract**: Add `branch: str | None = None` to `WorkflowRecommendation`.
 `_recommend_for_active_change` gains a `branch: str | None = None`
 parameter and passes it into every `WorkflowRecommendation(...)` it
-constructs.
-
-#### 2. Multi-change control flow
-
-**File**: `app/workflow_recommendations.py`
-
-**Intent**: `_recommend_for_project` returns `list[WorkflowRecommendation]`
-instead of a single value. When more than one change is active, each change
-gets its own entry: worktree-backed changes call
-`_recommend_for_active_change(..., branch=change.branch)` for a real
-command; changes with no worktree (`change.branch is None`) get an
-individual `_blocked(project, "Which change can be worked on next?", candidates=[change.change_id])`
-entry instead of being lumped into one combined blocked entry. The
-single-active-change and roadmap-eligible-change paths are unchanged except
-each now returns a one-item list, and pass `branch=active_change.branch`
-where a change is involved.
-
-**Contract**: `get_next_10x_action` changes its
-`recommendations.append(_recommend_for_project(project))` to
-`recommendations.extend(_recommend_for_project(project))` (the exception
-fallback path stays a single-item append via `_blocked`, wrapped in a list
-by the append itself since it's already one recommendation).
+constructs (including via `_blocked(..., branch=branch)`, which also gains
+a `branch` keyword). `_recommend_for_project` keeps returning a single
+`WorkflowRecommendation`: the single-active-change path passes
+`branch=active_change.branch` into `_recommend_for_active_change`; the
+multi-active-change path keeps building one combined blocked entry via
+`_blocked(project, "", candidates=[...], candidate_commands=candidate_commands)`
+exactly as today (the `candidate_commands` computation may pass
+`branch=change.branch` into its internal `_recommend_for_active_change`
+call, but no per-candidate branch is surfaced in the combined entry). The
+roadmap-eligible-change path is unaffected (no existing change, no branch).
+`get_next_10x_action` keeps its `recommendations.append(_recommend_for_project(project))` call unchanged.
 
 ### Success Criteria:
 
 #### Automated Verification:
 
 - [ ] `tests/test_workflow_recommendations.py::test_multiple_active_changes_block_a_command`
-      is rewritten to assert two individually-blocked recommendations
-      (see Critical Implementation Details) — do not leave the old
-      single-entry assertion in place.
-- [ ] New test: two active changes, one with a matching worktree, produces
-      exactly two recommendations — one with `command` set and `branch`
-      matching the worktree's branch, one blocked with
-      `candidates == [<the other change_id>]`.
-- [ ] New test: single active change with a matching worktree still
-      returns exactly one recommendation, with `branch` set.
+      is unchanged and still passes (single combined blocked entry, see
+      Critical Implementation Details).
+- [ ] New test: single active change with a matching worktree returns
+      exactly one recommendation, with `branch` set.
 - [ ] All existing `test_workflow_recommendations.py` cases still pass
-      (single-active-change and roadmap-selection paths unchanged in
-      behavior, only in return-type wrapping).
+      unchanged.
 - [ ] `uv run pytest` passes.
 
 #### Manual Verification:
 
-- Hit `GET /api/recommendations` against a project with two active
-  changes, one backed by a real worktree, and visually confirm the JSON
-  shape matches the automated test's expectation.
+- Hit `GET /api/recommendations` against a project with a single active
+  change backed by a real worktree, and visually confirm the JSON shows
+  one entry with `branch` set and a real `command`.
+- Hit `GET /api/recommendations` against a project with two or more active
+  changes and confirm it still returns exactly one combined blocked entry,
+  unchanged from today's shape.
 
 ---
 
@@ -300,7 +297,7 @@ Show the `branch` label in the next-action panel.
 
 **Intent**: When a recommendation has a `branch`, show it as a `(branch)`
 prefix next to the rendered command, following the existing element-creation
-pattern used for `candidates`/`candidate_commands` at lines 399-422.
+pattern used in `renderRecommendation` (`dist/app.js:376-421`).
 
 **Contract**: Wherever the recommendation's `command` is currently rendered
 into the DOM, check `recommendation.branch` and, if present, prepend a
@@ -338,10 +335,11 @@ call — works together, since Phases 1-3 are each tested in isolation.
 **File**: `tests/test_api.py`
 
 **Intent**: Add a fixture that turns a fixture project into an actual git
-repo (`git init`, one commit), creates a second active change directly in
-the main checkout, then uses `git worktree add` to create a linked worktree
-whose own `context/changes/<other-id>/change.md` exists, and asserts
-`GET /api/recommendations` returns two entries as designed.
+repo (`git init`, one commit), with a single active change directly in the
+main checkout, then uses `git worktree add` to create a linked worktree
+whose own `context/changes/<the-same-id>/change.md` exists, and asserts
+`GET /api/recommendations` returns the single, branch-labeled entry as
+designed.
 
 **Contract**: New test function using `subprocess.run` (or the existing
 project's preferred subprocess helper, if any) to drive `git init` /
@@ -353,8 +351,9 @@ the existing `_make_fixture_project` helper style already in this file.
 #### Automated Verification:
 
 - [ ] New end-to-end test passes: `GET /api/recommendations` on the
-      worktree-backed fixture returns one entry with `branch` set and a
-      real `command`, and one blocked entry for the non-worktree change.
+      worktree-backed fixture returns exactly one entry, with `branch` set
+      to the worktree's branch and a real `command` reflecting the
+      worktree's own `change.md`.
 - [ ] Full suite passes: `uv run pytest`.
 
 #### Manual Verification:
@@ -374,7 +373,8 @@ pause for manual confirmation before considering the change complete.
 - `app/worktrees.py`: git-failure fallback, no-worktrees case,
   matching/non-matching worktree correlation.
 - `app/workflow_recommendations.py`: per-change branch threading through
-  every recommendation path, multi-change list restructure.
+  the single-active-change recommendation path; multi-active-change path
+  unchanged.
 
 ### Integration Tests:
 
@@ -383,11 +383,14 @@ pause for manual confirmation before considering the change complete.
 
 ### Manual Testing Steps:
 
-1. Track a real project with two active changes.
-2. Create a `git worktree add` checkout for one of them with its own
+1. Track a real project with a single active change.
+2. Create a `git worktree add` checkout for it with its own
    `context/changes/<id>/change.md`.
 3. Load the dashboard and confirm the branch label appears next to that
-   change's recommendation, and the other change still shows as blocked.
+   change's recommendation.
+4. Track a second real project with two or more active changes and confirm
+   the dashboard still shows one combined "which change can be worked on
+   next?" entry, unchanged from today.
 
 ## Performance Considerations
 
@@ -410,9 +413,8 @@ models are unaffected.
 - `app/project_status.py:15` — `get_project_status`, correlation wiring
   point
 - `app/workflow_recommendations.py:174-232` — `_recommend_for_project`,
-  the code being restructured
-- `dist/app.js:399-422` — existing candidate-list rendering pattern
-- `tests/test_workflow_recommendations.py:136` — test requiring rewrite
+  gaining branch threading on the single-active-change path only
+- `dist/app.js:376-421` — `renderRecommendation`, gaining the branch label
 
 ## Progress
 
@@ -422,34 +424,33 @@ models are unaffected.
 
 #### Automated
 
-- [x] 1.1 New tests/test_worktrees.py passes (fallback, no-worktrees, match, non-match cases)
-- [x] 1.2 tests/test_changes.py still passes with branch defaulting to None
-- [x] 1.3 tests/test_projects.py and existing test_api.py project-status tests still pass unchanged
-- [x] 1.4 uv run pytest passes
+- [x] 1.1 New tests/test_worktrees.py passes (fallback, no-worktrees, match, non-match cases) — 1fe5d88
+- [x] 1.2 tests/test_changes.py still passes with branch defaulting to None — 1fe5d88
+- [x] 1.3 tests/test_projects.py and existing test_api.py project-status tests still pass unchanged — 1fe5d88
+- [x] 1.4 uv run pytest passes — 1fe5d88
 
 #### Manual
 
-- [x] 1.5 Manual worktree created; get_project_status reflects worktree's change.md and branch
+- [x] 1.5 Manual worktree created; get_project_status reflects worktree's change.md and branch — 1fe5d88
 
-### Phase 2: Recommendation Engine Restructure
+### Phase 2: Recommendation Engine Branch Threading
 
 #### Automated
 
-- [ ] 2.1 test_multiple_active_changes_block_a_command rewritten for two individually-blocked recommendations
-- [ ] 2.2 New test: worktree-backed + non-worktree active changes produce two correctly-shaped recommendations
-- [ ] 2.3 New test: single active change with worktree returns one recommendation with branch set
-- [ ] 2.4 All existing test_workflow_recommendations.py cases still pass
-- [ ] 2.5 uv run pytest passes
+- [x] 2.1 test_multiple_active_changes_block_a_command unchanged and still passes (single combined blocked entry)
+- [x] 2.2 New test: single active change with worktree returns one recommendation with branch set
+- [x] 2.3 All existing test_workflow_recommendations.py cases still pass unchanged
+- [x] 2.4 uv run pytest passes
 
 #### Manual
 
-- [ ] 2.6 GET /api/recommendations manually verified against a two-active-change project
+- [x] 2.5 GET /api/recommendations manually verified: single active change with worktree shows branch; multi-active-change project still shows one combined blocked entry
 
 ### Phase 3: Frontend Rendering
 
 #### Automated
 
-- [ ] 3.1 uv run pytest still passes
+- [x] 3.1 uv run pytest still passes
 
 #### Manual
 
@@ -460,7 +461,7 @@ models are unaffected.
 
 #### Automated
 
-- [ ] 4.1 New end-to-end test passes (real git repo + git worktree add)
+- [ ] 4.1 New end-to-end test passes (real git repo + git worktree add, single active change, one branch-labeled entry)
 - [ ] 4.2 Full suite passes: uv run pytest
 
 #### Manual

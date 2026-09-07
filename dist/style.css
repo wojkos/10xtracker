@@ -158,18 +158,81 @@ body {
   font-size: 0.9em;
 }
 
-#next-action {
-  margin: 1rem 0;
-  padding: 1rem;
+#next-action-toggle {
+  padding: 0.5em 1em;
+  background-color: var(--surface);
+  color: var(--text-primary);
   border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-family: var(--font);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
 }
 
-#next-action h2 {
-  margin: 0 0 0.75rem 0;
+#next-action-toggle:hover {
+  border-color: var(--accent);
+}
+
+.count-badge {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0.1em 0.4em;
+  border-radius: 999px;
+  background-color: var(--accent);
+  color: var(--surface);
+  font-size: 0.85em;
+  text-align: center;
+}
+
+#next-action-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+#next-action {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(570px, 90vw);
+  overflow-y: auto;
+  margin: 0;
+  padding: 1rem;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.12);
+  z-index: 11;
+}
+
+#next-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+#next-action-header h2 {
+  margin: 0;
   font-size: 1.1rem;
+}
+
+#next-action-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+#next-action-close:hover {
+  color: var(--text-primary);
 }
 
 .recommendation {
@@ -182,29 +245,10 @@ body {
 }
 
 .recommendation-path {
-  margin: 0;
-  font-size: 0.85em;
-  color: var(--text-secondary);
-}
-
-.confidence-badge {
-  display: inline-block;
-  margin-top: 0.25em;
-  padding: 0.15em 0.6em;
-  border-radius: 999px;
-  font-size: 0.8em;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.confidence-high {
-  background-color: #e3f1e6;
-  color: #256a38;
-}
-
-.confidence-low {
-  background-color: #fbe9e5;
-  color: var(--text-error);
+  margin: 0 0 0.35em 0;
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .recommendation-reason {
@@ -219,6 +263,11 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+.recommendation-branch {
+  color: var(--text-secondary, inherit);
+  font-weight: 600;
 }
 
 .recommendation-blocking-question {

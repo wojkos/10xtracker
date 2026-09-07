@@ -2,13 +2,26 @@ from pathlib import Path
 
 import pytest
 
-from app import projects
+from app import project_status, projects
+from app.changes import list_changes
 from app.workflow_recommendations import get_next_10x_action
 
 
 @pytest.fixture(autouse=True)
 def _isolated_data_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(projects, "DATA_FILE", tmp_path / "data" / "tracked_projects.json")
+
+
+def _stub_worktree_branch(monkeypatch: pytest.MonkeyPatch, change_id: str, branch: str) -> None:
+    def fake(project_path: Path, change_ids: set[str]):
+        if change_id not in change_ids:
+            return {}
+        for summary in list_changes(project_path / "context"):
+            if summary.change_id == change_id:
+                return {change_id: (branch, summary)}
+        return {}
+
+    monkeypatch.setattr(project_status, "get_worktree_branch_map", fake)
 
 
 def _make_project(
@@ -141,6 +154,19 @@ def test_multiple_active_changes_block_a_command(tmp_path: Path) -> None:
     assert recommendation.command is None
     assert recommendation.candidates == ["first", "second"]
     assert recommendation.blocking_question is not None
+
+
+def test_single_active_change_with_worktree_returns_one_recommendation_with_branch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _make_project(tmp_path, [("change", "new", set())])
+    _stub_worktree_branch(monkeypatch, "change", "feature-branch")
+
+    recommendations = get_next_10x_action()
+
+    assert len(recommendations) == 1
+    assert recommendations[0].command == "/10x-research change"
+    assert recommendations[0].branch == "feature-branch"
 
 
 def test_malformed_change_blocks_a_command(tmp_path: Path) -> None:
