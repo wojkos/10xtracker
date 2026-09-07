@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from app import projects
+from app.projects import TrackedProject
 
 
 @pytest.fixture(autouse=True)
@@ -43,10 +44,25 @@ def test_save_then_load_round_trip(tmp_path: Path) -> None:
     project_a = _make_project(tmp_path, "project-a")
     project_b = _make_project(tmp_path, "project-b")
 
-    projects.save_tracked_projects([project_a, project_b])
+    projects.save_tracked_projects(
+        [TrackedProject(path=project_a), TrackedProject(path=project_b)]
+    )
     loaded = projects.load_tracked_projects()
 
-    assert loaded == [project_a, project_b]
+    assert loaded == [
+        TrackedProject(path=project_a, active=True),
+        TrackedProject(path=project_b, active=True),
+    ]
+
+
+def test_load_migrates_legacy_bare_string_entries(tmp_path: Path) -> None:
+    project = _make_project(tmp_path, "legacy-project")
+    projects.DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    projects.DATA_FILE.write_text(f'["{project.as_posix()}"]', encoding="utf-8")
+
+    loaded = projects.load_tracked_projects()
+
+    assert loaded == [TrackedProject(path=project, active=True)]
 
 
 def test_remove_tracked_project_removes_it(tmp_path: Path) -> None:
@@ -58,7 +74,7 @@ def test_remove_tracked_project_removes_it(tmp_path: Path) -> None:
     projects.remove_tracked_project(project_a)
 
     loaded = projects.load_tracked_projects()
-    assert loaded == [project_b.resolve()]
+    assert loaded == [TrackedProject(path=project_b.resolve(), active=True)]
 
 
 def test_remove_untracked_project_raises(tmp_path: Path) -> None:
@@ -76,3 +92,20 @@ def test_remove_tracked_project_is_case_insensitive(tmp_path: Path) -> None:
     projects.remove_tracked_project(differently_cased)
 
     assert projects.load_tracked_projects() == []
+
+
+def test_set_project_active_persists_toggle(tmp_path: Path) -> None:
+    project = _make_project(tmp_path, "toggle-project")
+    projects.add_tracked_project(project)
+
+    projects.set_project_active(project, active=False)
+
+    loaded = projects.load_tracked_projects()
+    assert loaded == [TrackedProject(path=project.resolve(), active=False)]
+
+
+def test_set_project_active_on_untracked_path_raises(tmp_path: Path) -> None:
+    project = _make_project(tmp_path, "untracked-project")
+
+    with pytest.raises(ValueError):
+        projects.set_project_active(project, active=False)
